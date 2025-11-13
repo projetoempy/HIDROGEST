@@ -1,0 +1,11 @@
+# Ambiente Virtual do Python
+venv/
+*.pyc
+__pycache__/
+
+# Banco de dados
+db.sqlite3
+*.sqlite3
+
+# Arquivos de segredos (vamos ver isso depois)
+.env
