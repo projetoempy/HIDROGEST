@@ -37,6 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'usuarios',
+    'fornecedores',
+    'produtos',
+    'estoque',
+    'compras',
+    'retiradas',
 ]
 
 MIDDLEWARE = [
@@ -120,3 +126,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+#AUTH_USER_MODEL especifica o modelo de usuário que será utilizado no projeto.
+#Neste caso, estamos usando um modelo customizado chamado 'Usuario' definido no app 'usuarios'.
+#Isso permite adicionar campos personalizados como tipo de usuário, telefone, endereço e status de ativação.
+AUTH_USER_MODEL = 'usuarios.Usuario'
