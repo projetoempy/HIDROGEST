@@ -1,5 +1,5 @@
 # 📦 Projeto HIDROMANAGER
-Este projeto é um sistema web desenvolvido com Django, para gerenciar o estoque de produtos em uma empresa. Ele permite o controle de fornecedores, produtos, entradas e saídas de estoque, além de facilitar a gestão de compras e usuários com diferentes néveis de acesso(gerente e funcionário).
+Este projeto é um sistema web desenvolvido com Django, para gerenciar o estoque de produtos em uma empresa. Ele permite o controle de fornecedores, produtos, entradas e saídas de estoque, além de facilitar a gestão de compras e usuários com diferentes níveis de acesso(gerente e funcionário).
 
 ## Desenvolvido com
 * Python

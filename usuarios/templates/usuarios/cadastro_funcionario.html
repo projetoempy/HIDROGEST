@@ -1,6 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
 <h2>Cadastro de Funcionário</h2>
-<form method="post">
+<form method="post" class="form-cadastro">
   {% csrf_token %}
+  <div class="form-fields">
+
   {{ form.as_p }}
-  <button type="submit">Cadastrar</button>
+  </div>
+
+  <button type="submit" class="btn">Cadastrar</button>
 </form>
+{% endblock %}

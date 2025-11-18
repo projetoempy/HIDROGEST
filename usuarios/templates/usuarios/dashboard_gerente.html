@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Dashboard do Gerente</h1>
+
+    <p>Total de produtos cadastrados: <strong>{{ total_produtos }}</strong></p>
+    <p>Total de listas de compra: <strong>{{ total_listas }}</strong></p>
+    <p>Total de itens comprados: <strong>{{ total_itens_comprados }}</strong></p>
+
+    <!-- Tabela de Estoque Crítico -->
+    <h2>Produtos com Estoque Crítico</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade</th>
+          <th>Mínimo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in produtos_criticos %}
+          <tr class="{% if item.quantidade < item.quantidade_minima %}alerta{% endif %}">
+            <td>{{ item.produto.nome }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>{{ item.quantidade_minima }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">Nenhum produto em estado crítico.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Tabela de Funcionários Pendentes -->
+    <h2>Funcionários pendentes de ativação</h2>
+    <form method="post">
+      {% csrf_token %}
+      <table>
+        <thead>
+          <tr>
+            <th>Funcionário</th>
+            <th>E-mail</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for usuario in pendentes %}
+            <tr>
+              <td class="nome">{{ usuario.username }}</td>
+              <td>{{ usuario.email }}</td>
+              <td>
+                <button class="btn" name="usuario_id" value="{{ usuario.id }}">Ativar</button>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" class="empty">Nenhum funcionário pendente.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </form>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h2>Login</h2>
+
+    <form method="post" class="form-login">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="username">Usuário:</label>
+        <input type="text" id="username" name="username" class="input-field" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha:</label>
+        <input type="password" id="password" name="password" class="input-field" required>
+      </div>
+
+      <div class="center">
+        <button type="submit" class="btn">Entrar</button>
+      </div>
+    </form>
+
+    {% if erro %}
+      <p class="erro">{{ erro }}</p>
+    {% endif %}
+
+{% endblock %}
