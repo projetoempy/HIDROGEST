@@ -10,6 +10,9 @@
       {% if request.user.is_authenticated %}
         <span>Bem-vindo, {{ request.user.username }}!</span>
         <a href="{% url 'logout' %}" class="btn">Sair</a>
+        {% if request.user.tipo == 'gerente' %}
+            <a href="{% url 'cadastro_fornecedor' %}" class="btn">Cadastrar fornecedor</a>
+        {% endif %}
       {% else %}
         <a href="{% url 'login' %}" class="btn">Login</a>
         <a href="{% url 'cadastro_funcionario' %}" class="btn">Cadastrar Funcionário</a>

@@ -1,14 +1,26 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<h2>Cadastro de Funcionário</h2>
-<form method="post" class="form-cadastro">
-  {% csrf_token %}
-  <div class="form-fields">
+  <h2>Cadastro de Funcionário</h2>
 
-  {{ form.as_p }}
-  </div>
+  <form method="post" class="form-cadastro" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
 
-  <button type="submit" class="btn">Cadastrar</button>
-</form>
+    <div class="form-fields">
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="center">
+      <button type="submit" class="btn">Cadastrar</button>
+      
+    </div>
+  </form>
 {% endblock %}

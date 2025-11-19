@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.urls import path
+from fornecedores.views import cadastrar_fornecedor
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('usuarios.urls')),
+    path('fornecedores/', include('fornecedores.urls')),
+    path('retiradas/', include('retiradas.urls')),
+    path('usuarios/', include('usuarios.urls')),
+    path('produtos/', include('produtos.urls')),
 ]

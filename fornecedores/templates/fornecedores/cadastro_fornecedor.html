@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>Cadastro de Fornecedor</h2>
+
+  <form method="post" novalidate class="form-cadastro">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="form-fields">
+      <div class="form-group">
+        <label for="id_nome_empresa">Nome da empresa</label>
+        {{ form.nome_empresa }}
+        {{ form.nome_empresa.errors }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_cnpj">CNPJ</label>
+        {{ form.cnpj }}
+        {{ form.cnpj.errors }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_email">Email</label>
+        {{ form.email }}
+        {{ form.email.errors }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_telefone">Telefone</label>
+        {{ form.telefone }}
+        {{ form.telefone.errors }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_endereco">Endereço</label>
+        {{ form.endereco }}
+        {{ form.endereco.errors }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_site">Site</label>
+        {{ form.site }}
+        {{ form.site.errors }}
+      </div>
+
+      <div class="center">
+        <button type="submit" class="btn">Cadastrar</button>
+        <a href="{% url 'dashboard_gerente' %}" class="btn">Cancelar</a>
+      </div>
+    </div>
+  </form>
+{% endblock %}

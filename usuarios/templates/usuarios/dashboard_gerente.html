@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1>Dashboard do Gerente</h1>
-
+    
     <p>Total de produtos cadastrados: <strong>{{ total_produtos }}</strong></p>
     <p>Total de listas de compra: <strong>{{ total_listas }}</strong></p>
     <p>Total de itens comprados: <strong>{{ total_itens_comprados }}</strong></p>
@@ -31,7 +31,7 @@
     </table>
 
     <!-- Tabela de Funcionários Pendentes -->
-    <h2>Funcionários pendentes de ativação</h2>
+    <h2>Funcionários pendentes de ativação: {{ pendentes|length }}</h2>
     <form method="post">
       {% csrf_token %}
       <table>
@@ -59,4 +59,57 @@
         </tbody>
       </table>
     </form>
+    <h2>Histórico de Retiradas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Funcionário</th>
+        <th>Produto</th>
+        <th>Quantidade</th>
+        <th>Data e Hora</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.funcionario }}</td>
+        <td>{{ log.produto.nome }}</td>
+        <td>{{ log.quantidade }}</td>
+        <td>{{ log.data_hora|date:"d/m/Y H:i" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="empty">Nenhuma retirada registrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Lista de Fornecedores</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Empresa</th>
+        <th>Telefone</th>
+        <th>E-mail</th>
+        <th>Site</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for fornecedor in fornecedores %}
+      <tr>
+        <td>
+          <a href="{% url 'cadastrar_produto' fornecedor.id %}">
+            {{ fornecedor.nome_empresa }}
+          </a>
+        </td>
+        <td>{{ fornecedor.telefone }}</td>
+        <td>{{ fornecedor.email }}</td>
+        <td>{{ fornecedor.site }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="empty">Nenhum fornecedor cadastrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+
 {% endblock %}

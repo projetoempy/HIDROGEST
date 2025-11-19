@@ -7,13 +7,15 @@
       <tr>
         <th>Produto</th>
         <th>Quantidade</th>
+        <th>Mínimo</th>
       </tr>
     </thead>
     <tbody>
       {% for item in produtos_estoque %}
-        <tr class="{% if item.quantidade < item.quantidade_minima %}alerta{% endif %}">
+        <tr class="{% if item.quantidade <= item.quantidade_minima %}alerta{% endif %}">
           <td>{{ item.produto.nome }}</td>
           <td >{{ item.quantidade }}</td>
+          <td>{{item.quantidade_minima}}</td>
         </tr>
       {% empty %}
         <tr><td colspan="2">Nenhum produto cadastrado.</td></tr>

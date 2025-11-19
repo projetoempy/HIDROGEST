@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Estoque Disponível</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Quantidade</th>
+        <th>Descrição</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for estoque in estoques %}
+      <tr>
+        <td>{{ estoque.produto.nome }}</td>
+        <td>{{ estoque.quantidade }}</td>
+        <td>{{ estoque.produto.descricao }}</td>
+        <td>
+          <a href="{% url 'retirar_produto' estoque.produto.id %}" class="btn">Retirar</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="empty">Nenhum produto disponível.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
