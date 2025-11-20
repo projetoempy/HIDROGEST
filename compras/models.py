@@ -8,6 +8,7 @@ from fornecedores.models import Fornecedor
 class ListaCompra(models.Model):
     fornecedor = models.ForeignKey(Fornecedor, on_delete=models.CASCADE)
     data_criacao = models.DateTimeField(auto_now_add=True)
+    recebido = models.BooleanField(default=False)
 
 class ItemCompra(models.Model):
     lista = models.ForeignKey(ListaCompra, on_delete=models.CASCADE)

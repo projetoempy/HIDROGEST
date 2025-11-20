@@ -1,23 +1,30 @@
 {% load static %}
 
 <header>
-<div class="header-content">
+  <div class="header-content">
     <div class="logo">
-        <img src="{% static 'img/logo.png' %}" alt="Logo" style="height: 60px; vertical-align: middle; margin-right: 20px;">
-        <span>Projeto - Bolsa Futuro</span>
+      <img src="{% static 'img/logo.png' %}" alt="Logo" style="height: 60px; vertical-align: middle; margin-right: 20px;">
+      <span>Projeto - Bolsa Futuro</span>
     </div>
     <div>
       {% if request.user.is_authenticated %}
-        <span>Bem-vindo, {{ request.user.username }}!</span>
+        <span>Bem-vindo, {{ request.user.username }}! </span>
         <a href="{% url 'logout' %}" class="btn">Sair</a>
-        {% if request.user.tipo == 'gerente' %}
-            <a href="{% url 'cadastro_fornecedor' %}" class="btn">Cadastrar fornecedor</a>
+        {# Página Inicial (se não estiver na home) #}
+        {% if request.path != '/usuarios/' and request.path != '' %}
+          <a href="{% url 'home' %}" class="btn">Inicio</a>
+        {% endif %}
+        {# Dashboard do Funcionário #}
+        {% if request.user.tipo == 'funcionario' and request.path != '/usuarios/funcionario/dashboard/' %}
+          <a href="{% url 'dashboard_funcionario' %}" class="btn">Dashboard</a>
+        {% endif %}
+        {# Dashboard e ações do Gerente #}
+        {% if request.user.tipo == 'gerente' and request.path != '/usuarios/gerente/dashboard/' %}
+          <a href="{% url 'dashboard_gerente' %}" class="btn">Dashboard</a>
         {% endif %}
       {% else %}
         <a href="{% url 'login' %}" class="btn">Login</a>
-        <a href="{% url 'cadastro_funcionario' %}" class="btn">Cadastrar Funcionário</a>
       {% endif %}
     </div>
-
-</div>
+  </div>
 </header>

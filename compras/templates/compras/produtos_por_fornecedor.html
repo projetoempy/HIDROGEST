@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th>Produto</th>
+      <th>Quantidade desejada</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for produto in produtos %}
+      <tr>
+        <td>{{ produto.nome }}</td>
+        <td>
+          <input type="number" name="quantidade_{{ produto.id }}" min="0" placeholder="0" />
+          <input type="hidden" name="produto_ids" value="{{ produto.id }}" />
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="2"><em>Nenhum produto disponível para este fornecedor.</em></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

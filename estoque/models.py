@@ -5,7 +5,7 @@ from django.db import models
 from produtos.models import Produto
 
 class Estoque(models.Model):
-    produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
+    produto = models.OneToOneField(Produto, on_delete=models.CASCADE)
     quantidade = models.PositiveIntegerField()
     quantidade_minima = models.PositiveIntegerField()
     data_cadastro = models.DateTimeField(auto_now_add=True)

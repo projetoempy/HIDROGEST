@@ -205,3 +205,13 @@ li {
   border-radius: 5px;
   box-sizing: border-box;
 }
+
+.fornecedor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fornecedor-header h2 {
+  margin-bottom: 0;
+}

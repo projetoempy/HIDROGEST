@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Editar Produto: {{ produto.nome }}</h2>
+  <form method="post" class="form-cadastro">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    <a href="{% url 'cadastrar_produto' produto.fornecedor.id %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+{% endblock %}

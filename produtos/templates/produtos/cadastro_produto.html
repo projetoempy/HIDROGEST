@@ -25,7 +25,35 @@
     {{ form.descricao }}
   </div>
 
-  <button type="submit" class="btn btn-primary">Salvar</button>
+  <button type="submit" class="btn">Salvar</button>
+  <a href="{% url 'dashboard_gerente' %}" class="btn">Voltar</a>
 </form>
+
+<h3>Produtos já cadastrados para {{ fornecedor.nome_empresa }}</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Preço</th>
+      <th>Descrição</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for produto in produtos %}
+      <tr>
+        <td>{{ produto.nome }}</td>
+        <td>R$ {{ produto.preco }}</td>
+        <td>{{ produto.descricao }}</td>
+        <td>
+          <a href="{% url 'editar_produto' produto.id %}" class="btn">Editar</a>
+          <a href="{% url 'excluir_produto' produto.id %}" class="btn" onclick="return confirm('Tem certeza que deseja excluir este produto?')">Excluir</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4">Nenhum produto cadastrado para este fornecedor.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
 

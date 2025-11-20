@@ -1,7 +1,5 @@
 from django.shortcuts import render, redirect
 
-# Create your views here.
-
 from usuarios.models import Usuario
 from django.contrib.auth import authenticate, login, logout
 from .forms import CadastroFuncionarioForm
@@ -15,7 +13,8 @@ from fornecedores.models import Fornecedor
 
 # Página inicial
 def home(request):
-    produtos_estoque = Estoque.objects.select_related('produto').all()
+    # Atualiza os dados de estoque com base nos produtos
+    produtos_estoque = Estoque.objects.all()
     return render(request, 'usuarios/home.html', {'produtos_estoque': produtos_estoque})
 
 # Login
@@ -80,6 +79,7 @@ def dashboard_gerente(request):
     pendentes = Usuario.objects.filter(status_ativo=False, tipo='funcionario')
     logs = Retirada.objects.select_related('produto', 'funcionario').order_by('-data_hora')
     fornecedores = Fornecedor.objects.all()
+    produtos_estoque = Estoque.objects.select_related('produto').all()
 
     contexto = {
         'total_produtos': total_produtos,
@@ -89,6 +89,7 @@ def dashboard_gerente(request):
         'pendentes': pendentes,
         'logs': logs,
         'fornecedores': fornecedores,
+        'produtos_estoque': produtos_estoque,
     }
 
     return render(request, 'usuarios/dashboard_gerente.html', contexto)
@@ -107,5 +108,3 @@ def ativar_usuarios(request):
 
     pendentes = Usuario.objects.filter(status_ativo=False, tipo='funcionario')
     return render(request, 'usuarios/ativar_usuarios.html', {'pendentes': pendentes})
-
-
