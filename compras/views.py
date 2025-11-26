@@ -3,7 +3,9 @@ from .models import ListaCompra, ItemCompra
 from produtos.models import Produto
 from fornecedores.models import Fornecedor
 from estoque.models import Estoque
+from usuarios.views import login_required
 
+@login_required
 def lista_compras_view(request):
     erro = None  # variável para armazenar mensagem de erro
 

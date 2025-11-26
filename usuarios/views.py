@@ -15,7 +15,7 @@ from fornecedores.models import Fornecedor
 def home(request):
     # Atualiza os dados de estoque com base nos produtos
     produtos_estoque = Estoque.objects.all()
-    return render(request, 'usuarios/home.html', {'produtos_estoque': produtos_estoque})
+    return render(request, 'home.html', {'produtos_estoque': produtos_estoque})
 
 # Login
 def login_view(request):

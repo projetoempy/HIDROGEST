@@ -3,49 +3,7 @@
 {% block content %}
   <h1>Listas de Compras</h1>
 
-  <!-- Listas já criadas -->
-  <section>
-    <h2>Histórico de Listas de Compras</h2>
-    <ul>
-      {% for lista in listas %}
-        <li style="margin-bottom: 1rem;">
-          <strong>Fornecedor:</strong> {{ lista.fornecedor.nome_empresa }} |
-          <strong>Data:</strong> {{ lista.data_criacao|date:"d/m/Y H:i" }}
-
-          {% if lista.itens %}
-            <table style="margin-top: 0.5rem;">
-              <thead>
-                <tr>
-                  <th>Produto</th>
-                  <th>Quantidade</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for item in lista.itens %}
-                  <tr>
-                    <td>{{ item.produto.nome }}</td>
-                    <td>{{ item.quantidade_desejada }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          {% endif %}
-
-          <!-- Botão Receber Itens -->
-          <form method="post" style="margin-top: 0.5rem;">
-            {% csrf_token %}
-            <input type="hidden" name="receber_lista_id" value="{{ lista.id }}">
-            <button type="submit" class="btn" {% if lista.recebido %}disabled{% endif %}>
-              {% if lista.recebido %}Itens Recebidos{% else %}Receber Itens{% endif %}
-            </button>
-          </form>
-        </li>
-      {% empty %}
-        <li>Nenhuma lista de compras registrada.</li>
-      {% endfor %}
-    </ul>
-  </section>
-
+  
   <!-- Criar nova lista -->
   <section>
     <h2>Criar Nova Lista de Compras</h2>
@@ -90,4 +48,48 @@
       <button type="submit" class="btn">Concluir Lista de Compras</button>
     </form>
   </section>
+  
+  <!-- Listas já criadas -->
+  <section>
+    <h2>Histórico de Listas de Compras</h2>
+    <ul>
+      {% for lista in listas %}
+        <li style="margin-bottom: 1rem;">
+          <strong>Fornecedor:</strong> {{ lista.fornecedor.nome_empresa }} |
+          <strong>Data:</strong> {{ lista.data_criacao|date:"d/m/Y H:i" }}
+
+          {% if lista.itens %}
+            <table style="margin-top: 0.5rem;">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Quantidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in lista.itens %}
+                  <tr>
+                    <td>{{ item.produto.nome }}</td>
+                    <td>{{ item.quantidade_desejada }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
+
+          <!-- Botão Receber Itens -->
+          <form method="post" style="margin-top: 0.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="receber_lista_id" value="{{ lista.id }}">
+            <button type="submit" class="btn" {% if lista.recebido %}disabled{% endif %}>
+              {% if lista.recebido %}Itens Recebidos{% else %}Receber Itens{% endif %}
+            </button>
+          </form>
+        </li>
+      {% empty %}
+        <li>Nenhuma lista de compras registrada.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
 {% endblock %}

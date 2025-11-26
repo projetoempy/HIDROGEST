@@ -10,6 +10,42 @@
     <p>Total de itens comprados: <strong>{{ total_itens_comprados }}</strong></p>
   </section>
 
+  <!-- Lista de Fornecedores -->
+  <section>
+    <div class="fornecedor-header">
+      <h2>Lista de Fornecedores</h2>
+      <a href="{% url 'cadastro_fornecedor' %}" class="btn">Cadastrar fornecedor</a>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Telefone</th>
+          <th>E-mail</th>
+          <th>Site</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fornecedor in fornecedores %}
+          <tr>
+            <td>
+              <a href="{% url 'cadastrar_produto' fornecedor.id %}">
+                {{ fornecedor.nome_empresa }}
+              </a>
+            </td>
+            <td>{{ fornecedor.telefone }}</td>
+            <td>{{ fornecedor.email }}</td>
+            <td><a href="{{ fornecedor.site }}">{{ fornecedor.site }}</a></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="empty">Nenhum fornecedor cadastrado.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
   <!-- Produtos com Estoque Crítico -->
   <section>
     <div class="fornecedor-header">
@@ -60,9 +96,8 @@
               <form method="post" action="{% url 'atualizar_minimo' item.id %}" class="form-inline">
                 {% csrf_token %}
                 <span id="minimo-text-{{ item.id }}">{{ item.quantidade_minima }}</span>
-                <input type="number" name="quantidade_minima" value="{{ item.quantidade_minima }}" min="0"
-                       id="minimo-input-{{ item.id }}" style="display:none; width: 60px;" />
-                <button type="button" onclick="editarMinimo({{ item.id }})" id="btn-editar-{{ item.id }}">Editar</button>
+                <input type="number" name="quantidade_minima" value="{{ item.quantidade_minima }}" min="0" id="minimo-input-{{ item.id }}" style="display:none; width: 60px;" />
+                <button type="button" onclick="editarMinimo('{{ item.id }}')" id="btn-editar-{{ item.id }}">Editar</button>
                 <button type="submit" id="btn-salvar-{{ item.id }}" style="display:none;">Salvar</button>
               </form>
             </td>
@@ -129,42 +164,6 @@
         {% empty %}
           <tr>
             <td colspan="4" class="empty">Nenhuma retirada registrada.</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
-
-  <!-- Lista de Fornecedores -->
-  <section>
-    <div class="fornecedor-header">
-      <h2>Lista de Fornecedores</h2>
-      <a href="{% url 'cadastro_fornecedor' %}" class="btn">Cadastrar fornecedor</a>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Empresa</th>
-          <th>Telefone</th>
-          <th>E-mail</th>
-          <th>Site</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for fornecedor in fornecedores %}
-          <tr>
-            <td>
-              <a href="{% url 'cadastrar_produto' fornecedor.id %}">
-                {{ fornecedor.nome_empresa }}
-              </a>
-            </td>
-            <td>{{ fornecedor.telefone }}</td>
-            <td>{{ fornecedor.email }}</td>
-            <td><a href="{{ fornecedor.site }}">{{ fornecedor.site }}</a></td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="4" class="empty">Nenhum fornecedor cadastrado.</td>
           </tr>
         {% endfor %}
       </tbody>

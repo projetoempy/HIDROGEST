@@ -1,10 +1,12 @@
 from django.shortcuts import render
+from usuarios.views import login_required
 
 # Create your views here.
 from django.shortcuts import render, redirect
 from .forms import FornecedorForm
 from .models import Fornecedor
 
+@login_required
 def cadastrar_fornecedor(request):
     if request.method == 'POST':
         form = FornecedorForm(request.POST)
