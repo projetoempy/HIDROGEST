@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="center">Lista de Produtos</h2>
+
+  <!-- Botão para cadastrar novo produto -->
+  <div class="center">
+    <a href="{% url 'cadastrar_produto' %}" class="btn">Cadastrar Novo Produto</a>
+  </div>
+
+  <!-- Tabela de produtos -->
+  {% if produtos %}
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Fornecedor</th>
+          <th>Preço</th>
+          <th>Descrição</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for produto in produtos %}
+          <tr>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.fornecedor.nome }}</td>
+            <td>R$ {{ produto.preco }}</td>
+            <td>{{ produto.descricao|default:"-" }}</td>
+            <td>
+              <a href="{% url 'editar_produto' produto.id %}" class="btn">Editar</a>
+              <a href="{% url 'excluir_produto' produto.id %}" class="btn alerta">Excluir</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">Nenhum produto cadastrado.</p>
+  {% endif %}
+{% endblock %}

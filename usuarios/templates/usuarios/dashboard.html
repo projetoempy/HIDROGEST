@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Bem-vindo, {{ user.username }}!</h1>
+  <p class="center">Tipo de usuário: {{ user.tipo_usuario }}</p>
+  <p class="center">Empresa: {{ user.empresa.nome }}</p>
+
+  <nav class="center">
+    {% comment %} Navegação para os principais módulos {% endcomment %}
+    {% if user.tipo_usuario == 'GERENTE_MATRIZ' %}
+      <a href="{% url 'lista_empresas' %}" class="btn">Empresas</a>
+      <a href="{% url 'lista_usuarios' %}" class="btn">Usuários</a>
+      <a href="{% url 'lista_fornecedores' %}" class="btn">Fornecedores</a>
+      <a href="{% url 'lista_produtos' %}" class="btn">Produtos</a>
+    {% endif %}
+      {% if user.tipo_usuario == 'GERENTE_MATRIZ' or user.tipo_usuario == 'GERENTE_FILIAL' or user.tipo_usuario == 'GESTOR_FILIAL' or user.tipo_usuario == 'GESTOR_MATRIZ' %}
+      <a href="{% url 'lista_estoques' %}" class="btn">Estoques</a>
+      <a href="{% url 'lista_compras' %}" class="btn">Listas de Compra</a>
+    {% endif %}
+    
+    <a href="{% url 'logout' %}" class="btn">Sair</a>
+  </nav>
+
+  <section>
+    <h2 class="center">Resumo</h2>
+    <p class="center">Aqui você acessa os módulos principais do sistema.</p>
+  </section>
+{% endblock %}

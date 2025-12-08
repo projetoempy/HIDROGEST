@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="center">Criar Nova Lista</h2>
+  <form method="post" class="form-cadastro">
+    {% csrf_token %}
+    <div class="form-fields">
+      <p>
+        <label>Empresa</label>
+        <input type="hidden" name="empresa" value="{{ empresa.id }}">
+        <span>{{ empresa.nome }}</span>
+      </p>
+      <p>
+        <label>Número da Lista</label>
+        <span>Gerado automaticamente ao salvar</span>
+      </p>
+      <p>
+        <label>Status</label>
+        <span>Em análise</span>
+      </p>
+    </div>
+    <button type="submit" class="btn">Criar Lista</button>
+  </form>
+{% endblock %}

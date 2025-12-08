@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="center">Adicionar Item à Lista {{ lista.numero }}</h2>
+
+  <form method="post" class="form-cadastro">
+    {% csrf_token %}
+    <div class="form-fields">
+      <p>
+        <label for="produto">Produto</label>
+        <select name="produto" id="produto" required>
+          {% for produto in produtos %}
+            <option value="{{ produto.id }}">{{ produto.nome }} (Fornecedor: {{ produto.fornecedor.nome }})</option>
+          {% endfor %}
+        </select>
+      </p>
+      <p>
+        <label for="quantidade_desejada">Quantidade Desejada</label>
+        <input type="number" name="quantidade_desejada" id="quantidade_desejada" required>
+      </p>
+    </div>
+    <button type="submit" class="btn">Adicionar</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% load static %}
+
+<header>
+  <div class="header-content">
+    <div class="logo">
+      <img src="{% static 'img/logo.png' %}" alt="Logo" style="height: 60px; vertical-align: middle; margin-right: 20px;">
+      <span>Projeto - Bolsa Futuro</span>
+    </div>
+    <div>
+      {% if request.user.is_authenticated %}
+        <span>Bem-vindo, {{ request.user.username }}! </span>
+        <a href="{% url 'logout' %}" class="btn">Sair</a>
+        {# Página Inicial (se não estiver na home) #}
+        {% if request.path != '' %}
+          <a href="{% url 'home' %}" class="btn">Inicio</a>
+        {% endif %}       
+        {# Dashboard se não estiver nela #}
+        {% if request.path != '/dashboard/' %}
+          <a href="{% url 'dashboard' %}" class="btn">Dashboard</a>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'login' %}" class="btn">Login</a>
+      {% endif %}
+    </div>
+  </div>
+</header>

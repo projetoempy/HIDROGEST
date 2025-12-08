@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="center">Cadastro de Produto</h2>
+  <form method="post" class="form-cadastro">
+    {% csrf_token %}
+    <div class="form-fields">
+      <p>
+        <label for="nome">Nome</label>
+        <input type="text" name="nome" id="nome" value="{{ produto.nome|default:'' }}" required>
+      </p>
+      <p>
+        <label for="fornecedor">Fornecedor</label>
+        <select name="fornecedor" id="fornecedor" required>
+          {% for fornecedor in fornecedores %}
+            <option value="{{ fornecedor.id }}"
+              {% if produto.fornecedor.id == fornecedor.id %}selected{% endif %}>
+              {{ fornecedor.nome }}
+            </option>
+          {% endfor %}
+        </select>
+      </p>
+      <p>
+        <label for="preco">Preço</label>
+        <input type="number" step="0.01" name="preco" id="preco" value="{{ produto.preco|default:'' }}" required>
+      </p>
+      <p>
+        <label for="descricao">Descrição</label>
+        <textarea name="descricao" id="descricao">{{ produto.descricao|default:'' }}</textarea>
+      </p>
+    </div>
+    <button type="submit" class="btn">Salvar</button>
+  </form>
+{% endblock %}

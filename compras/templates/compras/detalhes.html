@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="center">Detalhes da Lista {{ lista.numero }}</h2>
+  <p><strong>Empresa:</strong> {{ lista.empresa.nome }}</p>
+  <p><strong>Status:</strong> {{ lista.get_status_display }}</p>
+  <p><strong>Criado por:</strong> {{ lista.criado_por.username }}</p>
+  <p><strong>Data:</strong> {{ lista.data_criacao|date:"d/m/Y H:i" }}</p>
+
+  <h3>Itens da Lista</h3>
+  {% if itens %}
+    <table>
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade Desejada</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in itens %}
+          <tr>
+            <td>{{ item.produto.nome }}</td>
+            <td>{{ item.quantidade_desejada }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">Nenhum item nesta lista.</p>
+  {% endif %}
+
+  <h3>Log de Alterações</h3>
+  {% if alteracoes %}
+    <ul>
+      {% for log in alteracoes %}
+        <li>
+          {{ log.data_hora|date:"d/m/Y H:i" }} - {{ log.alterado_por.username }} alterou
+          {{ log.produto.nome }} de {{ log.quantidade_antiga }} para {{ log.quantidade_nova }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Nenhuma alteração registrada.</p>
+  {% endif %}
+{% endblock %}

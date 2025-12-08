@@ -1,0 +1,88 @@
+from django.shortcuts import render, redirect, get_object_or_404
+
+# Create your views here.
+
+from django.contrib.auth import authenticate, login, logout
+from .models import Usuario
+from empresas.models import Empresa
+from django.contrib import messages
+
+#from django.contrib.auth.forms import UserCreationForm
+
+def home(request):
+    return render(request, 'home.html')
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None and user.status_ativo:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Usuário ou senha inválidos, ou conta inativa.")
+    return render(request, 'usuarios/login.html')
+
+def dashboard_view(request):
+    return render(request, 'usuarios/dashboard.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+def cadastro_usuario(request):
+    empresas = Empresa.objects.all()
+    if request.method == "POST":
+        username = request.POST['username']
+        email = request.POST['email']
+        password1 = request.POST['password1']
+        password2 = request.POST['password2']
+        empresa_id = request.POST['empresa']
+
+        if password1 != password2:
+            messages.error(request, "As senhas não coincidem.")
+        else:
+            empresa = Empresa.objects.get(id=empresa_id)
+            usuario = Usuario.objects.create_user(
+                username=username,
+                email=email,
+                password=password1,
+                empresa=empresa,
+                status_ativo=False  # conta começa inativa
+            )
+            messages.success(request, "Usuário cadastrado com sucesso! Aguarde ativação.")
+            return redirect('login')
+
+    return render(request, 'usuarios/cadastro.html', {'empresas': empresas})
+
+def lista_usuarios(request):
+    usuarios = Usuario.objects.all()
+    tipos_usuario = Usuario.TIPOS_USUARIO
+    empresas = Empresa.objects.all()
+    return render(request, 'usuarios/lista_usuarios.html', {
+        'usuarios': usuarios, 
+        'tipos_usuario': tipos_usuario,
+        'empresas': empresas,
+    })
+
+def alterar_usuario(request, id):
+    usuario = get_object_or_404(Usuario, id=id)
+    if request.method == "POST":
+        novo_tipo = request.POST.get('tipo_usuario')
+        empresa_id = request.POST.get('empresa_id')
+
+        usuario.tipo_usuario = novo_tipo if novo_tipo else None
+        usuario.empresa = Empresa.objects.get(id=empresa_id) if empresa_id else None
+        usuario.save()
+
+        messages.success(request, f"Usuário {usuario.username} atualizado com sucesso.")
+    return redirect('lista_usuarios')
+
+def toggle_usuario(request, id):
+    usuario = get_object_or_404(Usuario, id=id)
+    usuario.status_ativo = not usuario.status_ativo
+    usuario.save()
+    status = "ativado" if usuario.status_ativo else "desativado"
+    messages.success(request, f"Usuário {status} com sucesso.")
+    return redirect('lista_usuarios')
