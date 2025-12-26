@@ -6,19 +6,19 @@
     {% csrf_token %}
     <div class="form-fields">
       <p>
-        <label for="nome">Nome</label>
-        <input type="text" name="nome" id="nome" value="{{ produto.nome|default:'' }}" required>
+        <label for="fornecedor">Fornecedor</label>
+        {% if fornecedor.nome == None %}
+        <select name="fornecedor" id="fornecedor" required>{% for fornecedor in fornecedores %}<option value="{{ fornecedor.id }}"{% if produto.fornecedor.id == fornecedor.id %}selected{% endif %}>{{ fornecedor.nome }}</option>{% endfor %}</select>
+        {% else %}
+        <!-- campo oculto para enviar o ID -->
+        <input type="hidden" name="fornecedor" id="fornecedor" value="{{ fornecedor.id }}">
+        <!-- texto fixo mostrando o nome -->
+        <span class="erro">{{ fornecedor.nome }}</span>
+        {% endif %}
       </p>
       <p>
-        <label for="fornecedor">Fornecedor</label>
-        <select name="fornecedor" id="fornecedor" required>
-          {% for fornecedor in fornecedores %}
-            <option value="{{ fornecedor.id }}"
-              {% if produto.fornecedor.id == fornecedor.id %}selected{% endif %}>
-              {{ fornecedor.nome }}
-            </option>
-          {% endfor %}
-        </select>
+        <label for="nome">Nome</label>
+        <input type="text" name="nome" id="nome" value="{{ produto.nome|default:'' }}" required>
       </p>
       <p>
         <label for="preco">Preço</label>

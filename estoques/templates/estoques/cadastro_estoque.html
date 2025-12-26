@@ -2,6 +2,13 @@
 
 {% block content %}
   <h2 class="center">Cadastro de Estoque</h2>
+  {% if messages %}
+  <ul class="erro">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
   <form method="post" class="form-cadastro">
     {% csrf_token %}
     <div class="form-fields">
@@ -33,7 +40,7 @@
         <input type="number" name="quantidade_minima" id="quantidade_minima" value="{{ estoque.quantidade_minima|default:'' }}" required>
       </p>
     </div>
-    {% if empresa.nome == null %}
+    {% if empresa.id == '' %}
       <p style="color: crimson;">Nenhuma empresa associada. Por favor, fale com o gerente da matriz.</p>
     {% else %}
       <button type="submit" class="btn">Salvar</button>

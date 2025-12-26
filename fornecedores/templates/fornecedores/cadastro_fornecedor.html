@@ -11,7 +11,7 @@
       </p>
       <p>
         <label for="cnpj">CNPJ</label>
-        <input type="text" name="cnpj" id="cnpj" value="{{ fornecedor.cnpj|default:'' }}" required>
+        <input type="text" name="cnpj" id="cnpj" value="{{ fornecedor.cnpj|default:'' }}" required pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}" title="Digite no formato 00.000.000/0000-00">
       </p>
       <p>
         <label for="email">E-mail</label>

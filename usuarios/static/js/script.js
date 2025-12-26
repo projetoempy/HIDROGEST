@@ -33,3 +33,12 @@ function editarMinimo(id) {
     input.focus();
   }
 }
+
+document.getElementById("cnpj").addEventListener("input", function() {
+  const regex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
+  if (!regex.test(this.value)) {
+    this.setCustomValidity("CNPJ inválido. Use o formato 00.000.000/0000-00.");
+  } else {
+    this.setCustomValidity("");
+  }
+});

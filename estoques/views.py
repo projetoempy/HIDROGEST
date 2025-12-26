@@ -10,8 +10,20 @@ from empresas.models import Empresa
 from produtos.models import Produto
 
 def lista_estoques(request):
-    estoques = Estoque.objects.all()
-    return render(request, 'estoques/estoques.html', {'estoques': estoques})
+    usuario = request.user
+    empresa_usuario = usuario.empresa
+
+    # Se for funcionário da matriz → vê todos os estoques
+    if usuario.tipo_usuario in ["GERENTE_MATRIZ", "GESTOR_MATRIZ"]:
+        estoques = Estoque.objects.all()
+    else:
+        # Funcionários de filial → só veem estoques da própria empresa
+        estoques = Estoque.objects.filter(empresa=empresa_usuario)
+
+    return render(request, 'estoques/estoques.html', {
+        'estoques': estoques,
+        'empresa_usuario': empresa_usuario
+    })
 
 def adicionar_estoque(request):
     empresas = Empresa.objects.all()
@@ -24,10 +36,22 @@ def adicionar_estoque(request):
         quantidade_minima = request.POST['quantidade_minima']
         empresa = Empresa.objects.get(id=empresa_id)
         produto = Produto.objects.get(id=produto_id)
+        if Estoque.objects.filter(empresa=empresa, produto=produto).exists():
+            messages.error(request, f"Não pôde ser cadastrado o produto {produto.nome}, pois o estoque da empresa {empresa.nome} contêm o mesmo. Basta editá-lo!")
+            return render(request, 'estoques/cadastro_estoque.html', {
+                'empresas': empresas,
+                'produtos': produtos,
+                'empresa': empresa
+            })
+
         Estoque.objects.create(empresa=empresa, produto=produto, quantidade=quantidade, quantidade_minima=quantidade_minima)
         messages.success(request, "Produto adicionado ao estoque com sucesso!")
         return redirect('lista_estoques')
-    return render(request, 'estoques/cadastro_estoque.html', {'empresas': empresas, 'produtos': produtos, 'empresa': empresa})
+    return render(request, 'estoques/cadastro_estoque.html', {
+        'empresas': empresas, 
+        'produtos': produtos, 
+        'empresa': empresa
+    })
 
 def editar_estoque(request, id):
     estoque = get_object_or_404(Estoque, id=id)

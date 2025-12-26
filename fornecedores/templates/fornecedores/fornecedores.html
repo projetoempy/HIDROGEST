@@ -2,7 +2,13 @@
 
 {% block content %}
   <h2 class="center">Lista de Fornecedores</h2>
-
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <!-- Botão para cadastrar novo fornecedor -->
   <div class="center">
     <a href="{% url 'cadastrar_fornecedor' %}" class="btn">Cadastrar Novo Fornecedor</a>
@@ -30,8 +36,9 @@
             <td>{{ fornecedor.telefone }}</td>
             <td>{{ fornecedor.endereco }}</td>
             <td>
-              <a href="{% url 'editar_fornecedor' fornecedor.id %}" class="btn">Editar</a>
-              <a href="{% url 'excluir_fornecedor' fornecedor.id %}" class="btn alerta">Excluir</a>
+              <a href="{% url 'cadastrar_produto_fornecedor' fornecedor.id %}" class="btn">Cadastrar Produto</a>
+              <a href="{% url 'editar_fornecedor' fornecedor.id %}" class="btn">Editar Fornecedor</a>
+              <a href="{% url 'excluir_fornecedor' fornecedor.id %}" class="btn alerta" onclick="return confirm('Tem certeza que deseja excluir o fornecedor {{ fornecedor.nome }}?');">Excluir Fornecedor</a>
             </td>
           </tr>
         {% endfor %}

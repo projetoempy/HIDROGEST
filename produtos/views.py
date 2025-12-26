@@ -5,24 +5,45 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Produto
 from fornecedores.models import Fornecedor
+from django.contrib.auth.decorators import login_required
 
+@login_required(login_url='/login/')
 def lista_produtos(request):
-    produtos = Produto.objects.all()
-    return render(request, 'produtos/produtos.html', {'produtos': produtos})
+    fornecedores = Fornecedor.objects.all().prefetch_related('produtos')
+    return render(request, 'produtos/produtos_fornecedor.html', {'fornecedores': fornecedores})
 
-def cadastrar_produto(request):
+@login_required(login_url='/login/')
+def cadastrar_produto(request, fornecedor_id=None):
     fornecedores = Fornecedor.objects.all()
+    fornecedor = None
+
+    if fornecedor_id:
+        fornecedor = get_object_or_404(Fornecedor, id=fornecedor_id)
+
     if request.method == "POST":
         nome = request.POST['nome']
-        fornecedor_id = request.POST['fornecedor']
         preco = request.POST['preco']
-        descricao = request.POST.get('descricao', None)
-        fornecedor = Fornecedor.objects.get(id=fornecedor_id)
-        Produto.objects.create(nome=nome, fornecedor=fornecedor, preco=preco, descricao=descricao)
-        messages.success(request, "Produto cadastrado com sucesso!")
-        return redirect('lista_produtos')
-    return render(request, 'produtos/cadastro_produto.html', {'fornecedores': fornecedores})
+        descricao = request.POST.get('descricao', '')
 
+        if fornecedor:
+            fornecedor_final = fornecedor
+        else:
+            fornecedor_final = get_object_or_404(Fornecedor, id=request.POST['fornecedor'])
+
+        Produto.objects.create(
+            fornecedor=fornecedor_final,
+            nome=nome,
+            preco=preco,
+            descricao=descricao
+        )
+        messages.success(request, f"Produto cadastrado para o fornecedor {fornecedor_final.nome}!")
+        return redirect('lista_produtos')
+
+    return render(request, 'produtos/cadastro_produto.html', {
+        'fornecedor': fornecedor,
+        'fornecedores': fornecedores
+    })
+@login_required(login_url='/login/')
 def editar_produto(request, id):
     produto = get_object_or_404(Produto, id=id)
     fornecedores = Fornecedor.objects.all()
@@ -37,6 +58,7 @@ def editar_produto(request, id):
         return redirect('lista_produtos')
     return render(request, 'produtos/cadastro_produto.html', {'produto': produto, 'fornecedores': fornecedores})
 
+@login_required(login_url='/login/')
 def excluir_produto(request, id):
     produto = get_object_or_404(Produto, id=id)
     produto.delete()

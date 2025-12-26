@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="center">Lista de Produtos por Fornecedor</h2>
+
+  {% for fornecedor in fornecedores %}
+    <h3>{{ fornecedor.nome }} (CNPJ: {{ fornecedor.cnpj }}) <a href="{% url 'cadastrar_produto_fornecedor' fornecedor.id %}" class="btn">Cadastrar Novo Produto</a></h3>
+    
+    {% if fornecedor.produtos.all %}
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Descrição</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for produto in fornecedor.produtos.all %}
+            <tr>
+              <td>{{ produto.nome }}</td>
+              <td>R$ {{ produto.preco }}</td>
+              <td>{{ produto.descricao|default:"-" }}</td>
+              <td>
+                <a href="{% url 'editar_produto' produto.id %}" class="btn">Editar</a>
+                <a href="{% url 'excluir_produto' produto.id %}" class="btn alerta"
+                   onclick="return confirm('Tem certeza que deseja excluir o produto {{ produto.nome }}?');">
+                   Excluir
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty">Nenhum produto cadastrado para este fornecedor.</p>
+    {% endif %}
+    <hr>
+  {% endfor %}
+{% endblock %}

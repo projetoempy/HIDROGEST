@@ -28,8 +28,10 @@
               <td>{{ estoque.quantidade }}</td>
               <td>{{ estoque.quantidade_minima }}</td>
               <td>
-                <a href="{% url 'editar_estoque' estoque.id %}" class="btn">Editar</a>
-                <a href="{% url 'excluir_estoque' estoque.id %}" class="btn alerta">Excluir</a>
+                {% if empresa_usuario == estoque.empresa %}
+                  <a href="{% url 'editar_estoque' estoque.id %}" class="btn">Editar</a>
+                  <a href="{% url 'excluir_estoque' estoque.id %}" class="btn alerta">Excluir</a>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}
