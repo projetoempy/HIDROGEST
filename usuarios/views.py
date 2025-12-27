@@ -71,9 +71,34 @@ def alterar_usuario(request, id):
     if request.method == "POST":
         novo_tipo = request.POST.get('tipo_usuario')
         empresa_id = request.POST.get('empresa_id')
+        empresa = Empresa.objects.get(id=empresa_id) if empresa_id else None
 
+        # regra: impedir filial em empresa que já tem matriz
+        if novo_tipo in ["GERENTE_FILIAL", "GESTOR_FILIAL"]:
+            existe_matriz = Usuario.objects.filter(
+                empresa=empresa,
+                tipo_usuario__in=["GERENTE_MATRIZ", "GESTOR_MATRIZ"]
+            ).exclude(id=usuario.id).exists()
+
+            if existe_matriz:
+                messages.error(request, f"A empresa {empresa.nome} já possui usuário do tipo Matriz. \
+Não é permitido cadastrar usuários do tipo Filial nessa empresa.")
+                return redirect('lista_usuarios')
+
+        # regra: impedir matriz em empresa diferente da já existente
+        if novo_tipo in ["GERENTE_MATRIZ", "GESTOR_MATRIZ"]:
+            matriz_existente = Usuario.objects.filter(
+                tipo_usuario__in=["GERENTE_MATRIZ", "GESTOR_MATRIZ"]
+            ).exclude(id=usuario.id).first()
+
+            if matriz_existente and matriz_existente.empresa != empresa:
+                messages.error(request, f"Já existe um usuário matriz na empresa {matriz_existente.empresa.nome}. \
+Novos usuários do tipo matriz só podem ser cadastrados nessa mesma empresa.")
+                return redirect('lista_usuarios')
+
+        # se passou nas regras, atualiza normalmente
         usuario.tipo_usuario = novo_tipo if novo_tipo else None
-        usuario.empresa = Empresa.objects.get(id=empresa_id) if empresa_id else None
+        usuario.empresa = empresa
         usuario.save()
 
         messages.success(request, f"Usuário {usuario.username} atualizado com sucesso.")

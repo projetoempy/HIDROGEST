@@ -2,7 +2,13 @@
 
 {% block content %}
   <h2 class="center">Lista de Empresas</h2>
-
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <!-- Botão para cadastrar nova empresa -->
   <div class="center">
     <a href="{% url 'cadastrar_empresa' %}" class="btn">Cadastrar Nova Empresa</a>

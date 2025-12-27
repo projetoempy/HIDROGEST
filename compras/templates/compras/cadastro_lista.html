@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="center">Criar Nova Lista</h2>
+  <h2 class="center">Criar Nova Lista de Compras</h2>
   <form method="post" class="form-cadastro">
     {% csrf_token %}
     <div class="form-fields">
@@ -19,6 +19,39 @@
         <span>Em análise</span>
       </p>
     </div>
+
+    <h3>Produtos por Fornecedor</h3>
+    {% for fornecedor in fornecedores %}
+      <h4>{{ fornecedor.nome }} (CNPJ: {{ fornecedor.cnpj }})</h4>
+      {% if fornecedor.produtos.all %}
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Preço</th>
+              <th>Descrição</th>
+              <th>Quantidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for produto in fornecedor.produtos.all %}
+              <tr>
+                <td>{{ produto.nome }}</td>
+                <td>R$ {{ produto.preco }}</td>
+                <td>{{ produto.descricao|default:"-" }}</td>
+                <td>
+                  <input type="number" name="produto_{{ produto.id }}" min="0" value="0">
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty">Nenhum produto cadastrado para este fornecedor.</p>
+      {% endif %}
+      <hr>
+    {% endfor %}
+
     <button type="submit" class="btn">Criar Lista</button>
   </form>
 {% endblock %}

@@ -2,6 +2,13 @@
 
 {% block content %}
   <h2 class="center">Lista de Produtos por Fornecedor</h2>
+    {% if messages %}
+      <ul class="erro">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
 
   {% for fornecedor in fornecedores %}
     <h3>{{ fornecedor.nome }} (CNPJ: {{ fornecedor.cnpj }}) <a href="{% url 'cadastrar_produto_fornecedor' fornecedor.id %}" class="btn">Cadastrar Novo Produto</a></h3>

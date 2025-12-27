@@ -1,19 +1,29 @@
-  {% extends 'base.html' %}
+{% extends 'base.html' %}
 
-  {% block content %}
-    <h2 class="center">Controle de Estoques</h2>
+{% block content %}
+  <h2 class="center">Controle de Estoques</h2>
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 
-    <!-- Botão para adicionar novo item ao estoque -->
-    <div class="center">
-      <a href="{% url 'adicionar_estoque' %}" class="btn">Adicionar Produto ao Estoque</a>
-    </div>
+  <!-- Botão para adicionar novo item ao estoque -->
+  <div class="center">
+    <a href="{% url 'adicionar_estoque' %}" class="btn">Adicionar Produto ao Estoque</a>
+  </div>
 
-    <!-- Tabela de estoques -->
-    {% if estoques %}
+  <!-- Tabelas de estoques por empresa -->
+  {% if estoques %}
+    {% regroup estoques by empresa as estoques_por_empresa %}
+
+    {% for grupo in estoques_por_empresa %}
+      <h3>{{ grupo.grouper.nome }}</h3>
       <table>
         <thead>
           <tr>
-            <th>Empresa</th>
             <th>Produto</th>
             <th>Quantidade</th>
             <th>Quantidade Mínima</th>
@@ -21,9 +31,8 @@
           </tr>
         </thead>
         <tbody>
-          {% for estoque in estoques %}
+          {% for estoque in grupo.list %}
             <tr>
-              <td>{{ estoque.empresa.nome }}</td>
               <td>{{ estoque.produto.nome }}</td>
               <td>{{ estoque.quantidade }}</td>
               <td>{{ estoque.quantidade_minima }}</td>
@@ -37,7 +46,9 @@
           {% endfor %}
         </tbody>
       </table>
-    {% else %}
-      <p class="empty">Nenhum estoque cadastrado.</p>
-    {% endif %}
-  {% endblock %}
+      <hr>
+    {% endfor %}
+  {% else %}
+    <p class="empty">Nenhum estoque cadastrado.</p>
+  {% endif %}
+{% endblock %}

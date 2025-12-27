@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="center">Editar Lista {{ lista.numero }}</h2>
+
+  <form method="post" class="form-cadastro">
+    {% csrf_token %}
+    <p>
+      <label>Status</label>
+      <select name="status">
+        <option value="EM_ANALISE" {% if lista.status == "EM_ANALISE" %}selected{% endif %}>Em análise</option>
+        <option value="AUTORIZADA" {% if lista.status == "AUTORIZADA" %}selected{% endif %}>Autorizada</option>
+        <option value="UNIDA" {% if lista.status == "UNIDA" %}selected{% endif %}>Unida</option>
+        <option value="CONSOLIDADA" {% if lista.status == "CONSOLIDADA" %}selected{% endif %}>Consolidada</option>
+        <option value="EM_PROCESSO" {% if lista.status == "EM_PROCESSO" %}selected{% endif %}>Em Processo de Compra</option>
+        <option value="EM_ENTREGA" {% if lista.status == "EM_ENTREGA" %}selected{% endif %}>Em Rota de Entrega</option>
+        <option value="RECEBIDA" {% if lista.status == "RECEBIDA" %}selected{% endif %}>Itens Recebidos</option>
+      </select>
+    </p>
+
+    <h3>Itens da Lista</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade Atual</th>
+          <th>Nova Quantidade</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in itens %}
+          <tr>
+            <td>{{ item.produto.nome }}</td>
+            <td>{{ item.quantidade_desejada }}</td>
+            <td>
+              <input type="number" name="item_{{ item.id }}" min="0" value="{{ item.quantidade_desejada }}">
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button type="submit" class="btn">Salvar Alterações</button>
+  </form>
+{% endblock %}

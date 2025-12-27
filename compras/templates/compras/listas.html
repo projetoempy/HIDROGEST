@@ -7,7 +7,13 @@
   <div class="center">
     <a href="{% url 'criar_lista' %}" class="btn">Criar Nova Lista</a>
   </div>
-
+{% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <!-- Tabela de listas -->
   {% if listas %}
     <table>
@@ -31,7 +37,9 @@
             <td>{{ lista.data_criacao|date:"d/m/Y H:i" }}</td>
             <td>
               <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Detalhes</a>
-              <a href="{% url 'editar_lista' lista.id %}" class="btn">Editar</a>
+              {% if request.user.tipo_usuario == "GERENTE_MATRIZ" or request.user.tipo_usuario == "GERENTE_FILIAL" %}
+                <a href="{% url 'editar_lista' lista.id %}" class="btn">Editar</a>
+              {% endif %}
               <a href="{% url 'excluir_lista' lista.id %}" class="btn alerta">Excluir</a>
             </td>
           </tr>
