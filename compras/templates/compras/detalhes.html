@@ -7,6 +7,13 @@
   <p><strong>Criado por:</strong> {{ lista.criado_por.username }}</p>
   <p><strong>Data:</strong> {{ lista.data_criacao|date:"d/m/Y H:i" }}</p>
 
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <h3>Itens da Lista</h3>
   <form method="post">
     {% csrf_token %}
@@ -15,30 +22,78 @@
         <thead>
           <tr>
             <th>Produto</th>
+            <th>Preço Unitário</th>
             <th>Quantidade Atual</th>
+            <th>Preço Total</th>
             <th>Nova Quantidade</th>
           </tr>
         </thead>
         <tbody>
           {% for item in itens %}
             <tr>
-              <td>{{ item.produto.nome }}</td>
-              <td>{{ item.quantidade_desejada }}</td>
+              <td>{{ item.obj.produto.nome }}</td>
+              <td>R$ {{ item.preco_unitario|floatformat:2 }}</td>
+              <td>{{ item.obj.quantidade_desejada }}</td>
+              <td>R$ {{ item.preco_total|floatformat:2 }}</td>
               <td>
                 {% if lista.status != "EM_ANALISE" and request.user.tipo_usuario != "GERENTE_MATRIZ" and request.user.tipo_usuario != "GERENTE_FILIAL" %}
-                <!-- bloqueia edição -->
-                  <input type="number" value="{{ item.quantidade_desejada }}" disabled>
+                  <input type="number" value="{{ item.obj.quantidade_desejada }}" disabled>
                 {% else %}
-                  <input type="number" name="item_{{ item.id }}" min="0" value="{{ item.quantidade_desejada }}">
+                  <input type="number" name="item_{{ item.obj.id }}" min="0" value="{{ item.obj.quantidade_desejada }}">
                 {% endif %}
               </td>
             </tr>
           {% endfor %}
+          <tr>
+            <td colspan="3" style="text-align: left;"><strong>Valor Total da Lista:</strong></td>
+            <td> R$ {{ total_lista|floatformat:2 }}</td>
+            <td>              
+              {% if request.user.tipo_usuario == "GERENTE_MATRIZ" or request.user.tipo_usuario == "GERENTE_FILIAL" %}
+                {% if lista.status == "EM_PROCESSO_AUTORIZACAO" %}
+                  <button type="submit" name="AUTORIZADA" class="btn">Autorizar</button>
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
         </tbody>
       </table>
+
+      <h3>Adicionar Produtos</h3>
+      {% for fornecedor in fornecedores %}
+        <h4>{{ fornecedor.nome }} (CNPJ: {{ fornecedor.cnpj }})</h4>
+        {% if fornecedor.produtos.all %}
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Descrição</th>
+                <th>Quantidade</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for produto in fornecedor.produtos.all %}
+                <tr>
+                  <td>{{ produto.nome }}</td>
+                  <td>R$ {{ produto.preco }}</td>
+                  <td>{{ produto.descricao|default:"-" }}</td>
+                  <td>
+                    <input type="number" name="produto_{{ produto.id }}" min="0" value="0">
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="empty">Nenhum produto cadastrado para este fornecedor.</p>
+        {% endif %}
+        <hr>
+      {% endfor %}
       {% if lista.status == "EM_ANALISE" or request.user.tipo_usuario == "GERENTE_MATRIZ" or request.user.tipo_usuario == "GERENTE_FILIAL"%}
         <button type="submit" class="btn">Salvar Alterações</button>
-        <button type="submit" name="solicitar_autorizacao" class="btn alerta">Solicitar Autorização</button>
+        {% if request.user.tipo_usuario == "GESTOR_MATRIZ" or request.user.tipo_usuario == "GESTOR_FILIAL" %}
+          <button type="submit" name="solicitar_autorizacao" class="btn alerta">Solicitar Autorização</button>
+        {% endif %}
       {% endif %}
     {% else %}
       <p class="empty">Nenhum item nesta lista.</p>
