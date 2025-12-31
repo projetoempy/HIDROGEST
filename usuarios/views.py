@@ -6,11 +6,13 @@ from django.contrib.auth import authenticate, login, logout
 from .models import Usuario
 from empresas.models import Empresa
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from estoques.models import Estoque, LogRetirada
+from produtos.models import Produto
+from django.utils.dateparse import parse_date
 
 #from django.contrib.auth.forms import UserCreationForm
 
-def home(request):
-    return render(request, 'home.html')
 
 def login_view(request):
     if request.method == "POST":
@@ -24,8 +26,40 @@ def login_view(request):
             messages.error(request, "Usuário ou senha inválidos, ou conta inativa.")
     return render(request, 'usuarios/login.html')
 
+@login_required(login_url='/login/')
 def dashboard_view(request):
-    return render(request, 'usuarios/dashboard.html')
+    usuario = request.user
+    empresa_usuario = usuario.empresa
+
+    # pega apenas estoques da empresa do usuário logado
+    estoque = Estoque.objects.filter(empresa=empresa_usuario)
+
+    # Produtos para o filtro
+    produtos = Produto.objects.all()
+
+    # Saídas feitas pelo usuário logado 
+    retiradas = LogRetirada.objects.filter(empresa=empresa_usuario).order_by('-data_hora')
+
+    if request.method == "GET":
+        produto_id = request.GET.get('produto')
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
+
+        if produto_id:
+            retiradas = retiradas.filter(produto_id=produto_id)
+        if data_inicio:
+            retiradas = retiradas.filter(data_hora__date__gte=parse_date(data_inicio))
+        if data_fim:
+            retiradas = retiradas.filter(data_hora__date__lte=parse_date(data_fim))
+
+    return render(request, 'usuarios/dashboard.html', {
+        'user': usuario,
+        'estoque': estoque,
+        'empresa_usuario': empresa_usuario,
+        'retiradas': retiradas,
+        'produtos': produtos,
+    })
+
 
 def logout_view(request):
     logout(request)
@@ -56,6 +90,7 @@ def cadastro_usuario(request):
 
     return render(request, 'usuarios/cadastro.html', {'empresas': empresas})
 
+@login_required(login_url='/login/')
 def lista_usuarios(request):
     usuarios = Usuario.objects.all()
     tipos_usuario = Usuario.TIPOS_USUARIO
@@ -66,6 +101,7 @@ def lista_usuarios(request):
         'empresas': empresas,
     })
 
+@login_required(login_url='/login/')
 def alterar_usuario(request, id):
     usuario = get_object_or_404(Usuario, id=id)
     if request.method == "POST":
@@ -104,6 +140,7 @@ Novos usuários do tipo matriz só podem ser cadastrados nessa mesma empresa.")
         messages.success(request, f"Usuário {usuario.username} atualizado com sucesso.")
     return redirect('lista_usuarios')
 
+@login_required(login_url='/login/')
 def toggle_usuario(request, id):
     usuario = get_object_or_404(Usuario, id=id)
     usuario.status_ativo = not usuario.status_ativo

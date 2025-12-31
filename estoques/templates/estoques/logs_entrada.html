@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="center">Log de Entradas no Estoque</h2>
+{% if logs %}
+  <ul>
+    {% for log in logs %}
+      <li>
+        {{ log.data_hora|date:"d/m/Y H:i" }} - {{ log.usuario.username }}
+        recebeu {{ log.quantidade }} de {{ log.produto.nome }} ({{ log.empresa.nome }})
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="empty">Nenhuma entrada registrada.</p>
+{% endif %}
+{% endblock %}

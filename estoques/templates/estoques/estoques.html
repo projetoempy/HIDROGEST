@@ -15,6 +15,14 @@
     <a href="{% url 'adicionar_estoque' %}" class="btn">Adicionar Produto ao Estoque</a>
   </div>
 
+  <h3 class="center">Controle de Estoques</h3>
+
+  <form method="get" class="center" style="margin-bottom: 20px;">
+    <label for="produto">Pesquisar Produto:</label>
+    <input type="text" name="produto" id="produto" value="{{ produto_nome }}">
+    <button type="submit" class="btn">Filtrar</button>
+    <a href="{% url 'lista_estoques' %}" class="btn alerta">Limpar</a>
+  </form>
   <!-- Tabelas de estoques por empresa -->
   {% if estoques %}
     {% regroup estoques by empresa as estoques_por_empresa %}
@@ -32,7 +40,7 @@
         </thead>
         <tbody>
           {% for estoque in grupo.list %}
-            <tr>
+            <tr {% if estoque.quantidade < estoque.quantidade_minima %} style="background-color: rgb(255, 165, 192); font-weight: bold;" {% endif %}>
               <td>{{ estoque.produto.nome }}</td>
               <td>{{ estoque.quantidade }}</td>
               <td>{{ estoque.quantidade_minima }}</td>

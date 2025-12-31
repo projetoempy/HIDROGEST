@@ -7,21 +7,24 @@ from produtos.models import Produto
 
 class ListaCompra(models.Model):
     STATUS = [
-        ('EM_ANALISE', 'Em análise'),
+        ('EM_CRIACAO', 'Em Criação'),
         ('EM_PROCESSO_AUTORIZACAO', 'Em processo de autorização'),
         ('AUTORIZADA', 'Autorizada'),
         ('UNIDA', 'Unida'),
+        ('EM_PROCESSO_CONSOLIDACAO', 'Em processo de consolidação'),
         ('CONSOLIDADA', 'Consolidada'),
-        ('EM_PROCESSO', 'Em Processo de Compra'),
+        ('EM_PROCESSO_COMPRA', 'Em Processo de Compra'),
         ('EM_ENTREGA', 'Em Rota de Entrega'),
         ('RECEBIDA', 'Itens Recebidos'),
     ]
 
     numero = models.CharField(max_length=20, unique=False)  # Ex: 00001/2025
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name="listas_compra")
-    status = models.CharField(max_length=30, choices=STATUS, default='EM_ANALISE')
+    status = models.CharField(max_length=30, choices=STATUS, default='EM_CRIACAO')
     criado_por = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="listas_criadas")
     data_criacao = models.DateTimeField(auto_now_add=True)
+    listas_unidas = models.ManyToManyField("self", blank=True, symmetrical=False, related_name="lista_principal")
+
     class Meta:
         unique_together = ('empresa', 'numero')  # garante unicidade por empresa
 
