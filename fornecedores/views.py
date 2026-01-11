@@ -9,7 +9,10 @@ from django.contrib import messages
 @login_required(login_url='/login/')
 def lista_fornecedores(request):
     fornecedores = Fornecedor.objects.all()
-    return render(request, 'fornecedores/fornecedores.html', {'fornecedores': fornecedores})
+    return render(request, 'fornecedores/fornecedores.html', {
+        'fornecedores': fornecedores,
+        'header_title': 'Fornecedores'
+    })
 
 @login_required(login_url='/login/')
 def cadastrar_fornecedor(request):
@@ -27,7 +30,7 @@ def cadastrar_fornecedor(request):
                 'email': email,
                 'telefone': telefone,
                 'endereco': endereco,
-                'site': site
+                'site': site,
             }
         )
 
@@ -36,7 +39,9 @@ def cadastrar_fornecedor(request):
         else:
             messages.success(request, "Fornecedor cadastrado com sucesso!")
         return redirect('lista_fornecedores')
-    return render(request, 'fornecedores/cadastro_fornecedor.html')
+    return render(request, 'fornecedores/cadastro_fornecedor.html', {
+        'header_title': 'Cadastrar Fornecedor',
+    })
 
 @login_required(login_url='/login/')
 def editar_fornecedor(request, id):
@@ -51,7 +56,10 @@ def editar_fornecedor(request, id):
         fornecedor.save()
         messages.success(request, "Fornecedor atualizado com sucesso!")
         return redirect('lista_fornecedores')
-    return render(request, 'fornecedores/cadastro_fornecedor.html', {'fornecedor': fornecedor})
+    return render(request, 'fornecedores/cadastro_fornecedor.html', {
+        'fornecedor': fornecedor,
+        'header_title': 'Editar Fornecedor'
+    })
 
 @login_required(login_url='/login/')
 def excluir_fornecedor(request, id):

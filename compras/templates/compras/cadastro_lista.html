@@ -1,23 +1,27 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
-  <h2 class="center">Criar Nova Lista de Compras</h2>
+  <a href="{% url 'lista_compras' %}" class="btn">Voltar</a>
+  <div class="row">
+    <div class="card">
+      <img src="{% static 'img/lista_numero.png' %}" alt="Logo" class="card-img">
+      <p class="center">Número da lista: Será gerado ao salvar</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/empresa.png' %}" alt="Logo" class="card-img">
+      <p class="center">Empresa: {{ empresa.nome }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/status_lista.png' %}" alt="Logo" class="card-img">
+      <p class="center">Status: Em criação</p>
+    </div>
+  </div>
+
   <form method="post" class="form-cadastro">
     {% csrf_token %}
     <div class="form-fields">
-      <p>
-        <label>Empresa</label>
-        <input type="hidden" name="empresa" value="{{ empresa.id }}">
-        <span>{{ empresa.nome }}</span>
-      </p>
-      <p>
-        <label>Número da Lista</label>
-        <span>Gerado automaticamente ao salvar</span>
-      </p>
-      <p>
-        <label>Status</label>
-        <span>Em análise</span>
-      </p>
+      <!-- Campo oculto para o ID da empresa -->
+      <input type="hidden" name="empresa" value="{{ empresa.id }}">
     </div>
 
     <h3>Produtos por Fornecedor</h3>

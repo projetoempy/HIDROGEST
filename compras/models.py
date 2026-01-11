@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-from django.db import models
+
 from usuarios.models import Empresa, Usuario
 from produtos.models import Produto
 
@@ -37,6 +37,8 @@ class ItemListaCompra(models.Model):
     lista = models.ForeignKey(ListaCompra, on_delete=models.CASCADE, related_name="itens")
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
     quantidade_desejada = models.PositiveIntegerField(default=0)
+    preco_unitario = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) # Para armazenar o preço no momento da compra
+
 
     def __str__(self):
         return f"{self.produto.nome} ({self.quantidade_desejada})"

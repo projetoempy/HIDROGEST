@@ -24,7 +24,9 @@ def login_view(request):
             return redirect('dashboard')
         else:
             messages.error(request, "Usuário ou senha inválidos, ou conta inativa.")
-    return render(request, 'usuarios/login.html')
+    return render(request, 'usuarios/login.html', {
+        'header_title': 'Login'
+    })
 
 @login_required(login_url='/login/')
 def dashboard_view(request):
@@ -41,12 +43,12 @@ def dashboard_view(request):
     retiradas = LogRetirada.objects.filter(empresa=empresa_usuario).order_by('-data_hora')
 
     if request.method == "GET":
-        produto_id = request.GET.get('produto')
+        produto_nome = request.GET.get('produto')
         data_inicio = request.GET.get('data_inicio')
         data_fim = request.GET.get('data_fim')
 
-        if produto_id:
-            retiradas = retiradas.filter(produto_id=produto_id)
+        if produto_nome:
+            retiradas = retiradas.filter(produto__nome__icontains=produto_nome)
         if data_inicio:
             retiradas = retiradas.filter(data_hora__date__gte=parse_date(data_inicio))
         if data_fim:
@@ -58,6 +60,7 @@ def dashboard_view(request):
         'empresa_usuario': empresa_usuario,
         'retiradas': retiradas,
         'produtos': produtos,
+        'header_title': 'Dashboard',
     })
 
 
@@ -88,7 +91,10 @@ def cadastro_usuario(request):
             messages.success(request, "Usuário cadastrado com sucesso! Aguarde ativação.")
             return redirect('login')
 
-    return render(request, 'usuarios/cadastro.html', {'empresas': empresas})
+    return render(request, 'usuarios/cadastro.html', {
+        'empresas': empresas,
+        'header_title': 'Cadastrar Usuário'
+    })
 
 @login_required(login_url='/login/')
 def lista_usuarios(request):
@@ -99,6 +105,7 @@ def lista_usuarios(request):
         'usuarios': usuarios, 
         'tipos_usuario': tipos_usuario,
         'empresas': empresas,
+        'header_title': 'Usuários'
     })
 
 @login_required(login_url='/login/')

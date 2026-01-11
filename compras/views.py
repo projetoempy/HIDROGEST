@@ -1,125 +1,22 @@
-from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
-
-# Create your views here.
-
-from .models import ListaCompra, ItemListaCompra, LogAlteracaoLista
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from produtos.models import Produto
-from fornecedores.models import Fornecedor
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Sum
-from estoques.models import Estoque, LogEntrada
+
+from .models import ListaCompra, ItemListaCompra, LogAlteracaoLista
+from produtos.models import Produto
+from fornecedores.models import Fornecedor
+from estoques.models import Estoque, LogEntrada, LogRetirada
 
 
-@login_required(login_url='/login/')
-def lista_compras(request):
-    if request.user.tipo_usuario in ["GERENTE_MATRIZ", "GESTOR_MATRIZ"]:
-        # gerentes matriz/gestor matriz veem todas menos as em análise e em processo de autorização
-        listas = ListaCompra.objects.exclude(
-            status__in=["EM_CRIACAO", "EM_PROCESSO_AUTORIZACAO"]
-        ) | ListaCompra.objects.filter(
-            empresa=request.user.empresa,
-            status__in=["EM_CRIACAO", "EM_PROCESSO_AUTORIZACAO"]
-        )
-    else:
-        # Outros só veem listas da própria empresa
-        listas = ListaCompra.objects.filter(empresa=request.user.empresa)
-
-     # Filtros
-    empresa_nome = request.GET.get('empresa') or ''
-    status = request.GET.get('status')
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
-
-    if empresa_nome:
-        listas = listas.filter(empresa__nome__icontains=empresa_nome)
-    if status:
-        listas = listas.filter(status=status)
-    if data_inicio:
-        listas = listas.filter(data_criacao__date__gte=data_inicio)
-    if data_fim:
-        listas = listas.filter(data_criacao__date__lte=data_fim)
-    principal = request.GET.get('principal')  # pode ser "sim" ou vazio
-
-    if principal == "unidas":
-        # mantém apenas listas principais (as que possuem listas_unidas)
-        listas = listas.filter(listas_unidas__isnull=False).distinct()
-
-
-    # separa principais e unidas, serve para adicionar filtro de pesquisa
-    principais = []
-    unidas = []
-    for lista in listas:
-        if lista.listas_unidas.exists():
-            lista.is_principal = True
-            principais.append(lista)
-        else:
-            lista.is_principal = False
-            unidas.append(lista)
-    
-    tem_autorizada = listas.filter(empresa=request.user.empresa, status="AUTORIZADA").exists()
-    tem_unida = listas.filter(empresa=request.user.empresa, status="UNIDA").exists()
-    tem_consolidada = listas.filter(empresa=request.user.empresa, status="CONSOLIDADA").exists()
-    return render(request, 'compras/listas.html', {
-        'listas': listas, 
-        'tem_autorizada': tem_autorizada, 
-        'tem_unida': tem_unida, 
-        'tem_consolidada': tem_consolidada,
-        'principais': principais, 
-        'unidas': unidas,
-        'empresa_nome': empresa_nome,
-        'status': status,
-        'data_inicio': data_inicio,
-        'data_fim': data_fim,
-    })
-
-
-@login_required(login_url='/login/')
-def criar_lista(request):
-    empresa = request.user.empresa
-
-    if request.method == "POST":
-        # gera número automático
-        ultimo = ListaCompra.objects.filter(empresa=empresa).order_by('id').last()
-        if ultimo:
-            numero_seq = int(ultimo.numero.split('/')[0]) + 1
-        else:
-            numero_seq = 1
-        numero = f"{str(numero_seq).zfill(5)}/{timezone.now().year}"
-
-        lista = ListaCompra.objects.create(
-            numero=numero,
-            empresa=empresa,
-            criado_por=request.user,
-            status='EM_CRIACAO'
-        )
-
-        # percorre todos os produtos enviados
-        for produto in Produto.objects.all():
-            qtd = int(request.POST.get(f"produto_{produto.id}", 0))
-            if qtd > 0:
-                ItemListaCompra.objects.create(
-                    lista=lista,
-                    produto=produto,
-                    quantidade_desejada=qtd
-                )
-
-        messages.success(request, f"Lista {lista.numero} criada com sucesso!")
-        return redirect('detalhes_lista', id=lista.id)
-
-    # GET → renderiza formulário com fornecedores e produtos
-    fornecedores = Fornecedor.objects.all().prefetch_related('produtos')
-    return render(request, 'compras/cadastro_lista.html', {
-        'empresa': empresa,
-        'fornecedores': fornecedores
-    })
-
+# -------------------------------
+# Funções utilitárias
+# -------------------------------
 
 def registrar_log(lista, produto, usuario, antiga, nova):
-    """Função utilitária para registrar alterações no log."""
+    """Registra alterações de quantidade em uma lista de compras."""
     LogAlteracaoLista.objects.create(
         lista=lista,
         produto=produto,
@@ -130,49 +27,186 @@ def registrar_log(lista, produto, usuario, antiga, nova):
     )
 
 
+def congelar_precos(lista):
+    """Congela preços dos itens de uma lista."""
+    for item in lista.itens.all():
+        if not item.preco_unitario:
+            item.preco_unitario = item.produto.preco
+            item.save()
+
+
+# -------------------------------
+# Views principais
+# -------------------------------
+
+@login_required(login_url='/login/')
+def lista_compras(request):
+    """Lista todas as compras visíveis para o usuário."""
+    if request.user.tipo_usuario in ["GERENTE_MATRIZ", "GESTOR_MATRIZ"]:
+        listas = ListaCompra.objects.exclude(
+            status__in=["EM_CRIACAO", "EM_PROCESSO_AUTORIZACAO"]
+        ) | ListaCompra.objects.filter(
+            empresa=request.user.empresa,
+            status__in=["EM_CRIACAO", "EM_PROCESSO_AUTORIZACAO"]
+        )
+    else:
+        listas = ListaCompra.objects.filter(empresa=request.user.empresa)
+
+    # Filtros
+    empresa_nome = request.GET.get('empresa') or ""
+    status = request.GET.get('status')
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    principal = request.GET.get('principal')
+
+    if empresa_nome:
+        listas = listas.filter(empresa__nome__icontains=empresa_nome)
+    if status:
+        listas = listas.filter(status=status)
+    if data_inicio:
+        listas = listas.filter(data_criacao__date__gte=data_inicio)
+    if data_fim:
+        listas = listas.filter(data_criacao__date__lte=data_fim)
+
+    # Principais e unidas
+    principais, unidas = [], []
+    for lista in listas:
+        if lista.listas_unidas.exists():
+            lista.is_principal = True
+            principais.append(lista)
+        else:
+            lista.is_principal = False
+            unidas.append(lista)
+
+    # aplica filtro de principal/unidas
+    if principal == "principais":
+        listas = principais  # mostra só as listas principais (que têm unidas)
+    elif principal == "unidas":
+        listas = unidas # só as listas unidas (que pertencem a uma principal)
+
+    contexto = {
+        'listas': listas,
+        'tem_autorizada': listas.filter(empresa=request.user.empresa, status="AUTORIZADA").exists() if hasattr(listas, 'filter') else False,
+        'tem_unida': listas.filter(empresa=request.user.empresa, status="UNIDA").exists() if hasattr(listas, 'filter') else False,
+        'tem_consolidada': listas.filter(empresa=request.user.empresa, status="CONSOLIDADA").exists() if hasattr(listas, 'filter') else False,
+        'principais': principais,
+        'unidas': unidas,
+        'empresa_nome': empresa_nome,
+        'status': status,
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+        'header_title': "Listas de Compra",
+    }
+    return render(request, 'compras/listas.html', contexto)
+
+
+@login_required(login_url='/login/')
+def criar_lista(request):
+    """Cria uma nova lista de compras."""
+    empresa = request.user.empresa
+    ano_atual = timezone.now().year
+
+    if request.method == "POST":
+        # pega apenas listas do ano atual
+
+        ultimo = ListaCompra.objects.filter(
+            empresa=empresa, 
+            numero__endswith=f"/{ano_atual}"
+        ).order_by('id').last()
+        # se não houver nenhuma lista no ano atual, começa em 1
+
+        numero_seq = int(ultimo.numero.split('/')[0]) + 1 if ultimo else 1
+        # monta o número com 5 dígitos e ano atual
+        numero = f"{str(numero_seq).zfill(5)}/{ano_atual}"
+
+        lista = ListaCompra.objects.create(
+            numero=numero,
+            empresa=empresa,
+            criado_por=request.user,
+            status='EM_CRIACAO'
+        )
+
+        # Adiciona produtos
+        for produto in Produto.objects.all():
+            qtd = int(request.POST.get(f"produto_{produto.id}", 0))
+            if qtd > 0:
+                ItemListaCompra.objects.create(
+                    lista=lista,
+                    produto=produto,
+                    quantidade_desejada=qtd,
+                    preco_unitario=produto.preco
+                )
+
+        messages.success(request, f"Lista {lista.numero} criada com sucesso!")
+        return redirect('detalhes_lista', id=lista.id)
+
+    fornecedores = Fornecedor.objects.all().prefetch_related('produtos')
+    return render(request, 'compras/cadastro_lista.html', {
+        'empresa': empresa,
+        'fornecedores': fornecedores,
+        'header_title': "Nova Lista de Compras",
+    })
+
+
 @login_required(login_url='/login/')
 def detalhes_lista(request, id):
+    """Detalhes de uma lista de compras, com ações de status e edição de itens."""
     lista = get_object_or_404(ListaCompra, id=id)
     itens = ItemListaCompra.objects.filter(lista=lista)
     alteracoes = LogAlteracaoLista.objects.filter(lista=lista)
     fornecedores = Fornecedor.objects.all().prefetch_related('produtos')
+    
+    # Filtro de produto por nome
+    filtro_nome = request.GET.get("produto_nome", "")
+    fornecedores = Fornecedor.objects.all().prefetch_related('produtos')
 
-    # calcular preço total de cada item e valor total da lista
+    if filtro_nome:
+        for fornecedor in fornecedores:
+            fornecedor.produtos_filtrados = fornecedor.produtos.filter(nome__icontains=filtro_nome)
+    else:
+        for fornecedor in fornecedores:
+            fornecedor.produtos_filtrados = fornecedor.produtos.all()
+
+
+    # Calcular preço total de cada item e valor total da lista
     itens_com_preco = []
     for item in itens:
-        preco_unitario = item.produto.preco
+        preco_unitario = item.preco_unitario or item.produto.preco
         preco_total = item.quantidade_desejada * preco_unitario
         itens_com_preco.append({
             'obj': item,
             'preco_unitario': preco_unitario,
             'preco_total': preco_total
         })
-
     total_lista = sum(i['preco_total'] for i in itens_com_preco)
 
+    # -------------------------------
+    # Ações via POST
+    # -------------------------------
     if request.method == "POST":
-         # Botão Solicitar Autorização
+
+        # Solicitar autorização
         if "solicitar_autorizacao" in request.POST:
-            if request.user.tipo_usuario != "GESTOR_MATRIZ" and request.user.tipo_usuario != "GESTOR_FILIAL":
+            if request.user.tipo_usuario not in ["GESTOR_MATRIZ", "GESTOR_FILIAL"]:
                 messages.error(request, "Você não tem permissão para processar compras.")
                 return redirect("lista_compras")
             lista.status = "EM_PROCESSO_AUTORIZACAO"
             lista.save()
             messages.success(request, "Solicitação de autorização enviada!")
-            return redirect('lista_compras')
+            return redirect("lista_compras")
 
-        # Botão Autorizar
-        if "AUTORIZADA" in request.POST:
-            if request.user.tipo_usuario != "GERENTE_MATRIZ" and request.user.tipo_usuario != "GERENTE_FILIAL":
+        # Autorizar lista
+        elif "AUTORIZADA" in request.POST:
+            if request.user.tipo_usuario not in ["GERENTE_MATRIZ", "GERENTE_FILIAL"]:
                 messages.error(request, "Você não tem permissão para autorizar compras.")
                 return redirect("lista_compras")
             lista.status = "AUTORIZADA"
             lista.save()
             messages.success(request, "Lista autorizada com sucesso!")
-            return redirect('lista_compras')
+            return redirect("lista_compras")
 
-        # Botão Consolidar
-        if "CONSOLIDADA" in request.POST:
+        # Consolidar lista
+        elif "CONSOLIDADA" in request.POST:
             if request.user.tipo_usuario != "GERENTE_MATRIZ":
                 messages.error(request, "Você não tem permissão para consolidar compras.")
                 return redirect("lista_compras")
@@ -180,10 +214,10 @@ def detalhes_lista(request, id):
             lista.save()
             lista.listas_unidas.update(status="CONSOLIDADA")
             messages.success(request, "Lista consolidada com sucesso!")
-            return redirect('lista_compras')
-        
-        # Botão Processar Compra
-        if "EM_PROCESSO_COMPRA" in request.POST:
+            return redirect("lista_compras")
+
+        # Processar compra
+        elif "EM_PROCESSO_COMPRA" in request.POST:
             if request.user.tipo_usuario != "GESTOR_MATRIZ":
                 messages.error(request, "Você não tem permissão para processar compras.")
                 return redirect("lista_compras")
@@ -192,24 +226,25 @@ def detalhes_lista(request, id):
             lista.listas_unidas.update(status="EM_PROCESSO_COMPRA")
             messages.success(request, "Lista atualizada para processo de compra e propagada para unidas!")
             return redirect("lista_compras")
-        
-        # Botão Finalizar Compra
-        if "RECEBIDA" in request.POST:
-            if request.user.tipo_usuario != "GESTOR_MATRIZ" and request.user.tipo_usuario != "GESTOR_FILIAL" and lista.status != "EM_ENTREGA":
+
+        # Receber itens
+        elif "RECEBIDA" in request.POST:
+            if request.user.tipo_usuario not in ["GESTOR_MATRIZ", "GESTOR_FILIAL"] and lista.status != "EM_ENTREGA":
                 messages.error(request, "Você não tem permissão para finalizar compras.")
                 return redirect("lista_compras")
 
-            # percorre todos os itens da lista e adiciona ao estoque da empresa
+            # Congela preços da lista principal
+            congelar_precos(lista)
+            
+            # Atualiza estoque da lista principal
             for item in itens:
-                estoque, created = Estoque.objects.get_or_create(
+                estoque, _ = Estoque.objects.get_or_create(
                     empresa=lista.empresa,
-                    produto=item.produto,
-                    defaults={'quantidade': 0, 'quantidade_minima': 0}
+                    produto__nome=item.produto.nome,
+                    defaults={'produto': item.produto,'quantidade': 0, 'quantidade_minima': 0}
                 )
                 estoque.quantidade += item.quantidade_desejada
                 estoque.save()
-
-                 # registra log de entrada
                 LogEntrada.objects.create(
                     usuario=request.user,
                     empresa=lista.empresa,
@@ -217,74 +252,106 @@ def detalhes_lista(request, id):
                     quantidade=item.quantidade_desejada
                 )
 
+            # Congela preços e atualiza status das listas unidas
+            for lista_unida in lista.listas_unidas.filter(empresa=lista.empresa).all():
+                # Congela preços da lista unida
+                congelar_precos(lista_unida)
+                 # Atualiza estoque das listas unidas
+                lista_unida.status = "RECEBIDA"
+                lista_unida.save()
+
             lista.status = "RECEBIDA"
             lista.save()
-
-             # atualiza status apenas das listas unidas da mesma empresa
-            lista.listas_unidas.filter(empresa=lista.empresa).update(status="RECEBIDA")
-
             messages.success(request, "Itens recebidos e adicionados ao estoque com sucesso!")
             return redirect("lista_compras")
 
-        # Botão Em Rota de Entrega
-        if "EM_ENTREGA" in request.POST:
+        # Enviar itens (rota de entrega)
+        elif "EM_ENTREGA" in request.POST:
             if request.user.tipo_usuario != "GESTOR_MATRIZ":
                 messages.error(request, "Você não tem permissão para atualizar o status de entrega.")
                 return redirect("lista_compras")
+
+            for item in itens:
+                estoque_matriz, _ = Estoque.objects.get_or_create(
+                    empresa=request.user.empresa,
+                    produto=item.produto,
+                    defaults={'quantidade': 0, 'quantidade_minima': 0}
+                )
+
+                # Verifica se há estoque suficiente
+                if estoque_matriz.quantidade < item.quantidade_desejada:
+                    messages.error(request, f"Estoque insuficiente para {item.produto.nome}.")
+                    return redirect("detalhes_lista", id=lista.id)
+
+                # Deduz quantidade enviada
+                estoque_matriz.quantidade -= item.quantidade_desejada
+                estoque_matriz.save()
+
+                # Registra como retirada
+                LogRetirada.objects.create(
+                    usuario=request.user,
+                    empresa=request.user.empresa,
+                    produto=item.produto,
+                    quantidade=item.quantidade_desejada
+                )
+
             lista.status = "EM_ENTREGA"
             lista.save()
             messages.success(request, "Status atualizado para Em Rota de Entrega!")
             return redirect("lista_compras")
 
-        # Botão Atualizar Status de listas unidas
-        if "atualizar_status" in request.POST:
+        # Atualizar status manualmente
+        elif "atualizar_status" in request.POST:
             novo_status = request.POST.get("status")
             if novo_status:
                 lista.status = novo_status
                 lista.save()
-                # Propagar para unidas (listas ligadas a esta como principal)
                 lista.listas_unidas.update(status=novo_status)
                 messages.success(request, f"Status atualizado para {novo_status} e propagado.")
                 return redirect('detalhes_lista', id=lista.id)
 
-        # Adicionar novos produtos
-        for fornecedor in fornecedores:
-            for produto in fornecedor.produtos.all():
-                qtd = int(request.POST.get(f"produto_{produto.id}", 0))
-                if qtd > 0:
-                    item_existente = ItemListaCompra.objects.filter(lista=lista, produto=produto).first()
-                    if item_existente:
-                        messages.warning(request, f"O produto {produto.nome} já está na lista e não pode ser duplicado.")
-                    else:
-                        ItemListaCompra.objects.create(
-                            lista=lista,
-                            produto=produto,
-                            quantidade_desejada=qtd
-                        )
-                        registrar_log(lista, produto, request.user, 0, qtd)
-                        messages.success(request, f"Produto {produto.nome} adicionado à lista.")
+        # Adicionar novos produtos + Alterações nos itens
+        else:
+            # Adicionar novos produtos
+            for fornecedor in fornecedores:
+                for produto in fornecedor.produtos.all():
+                    qtd = int(request.POST.get(f"produto_{produto.id}", 0))
+                    if qtd > 0:
+                        item_existente = ItemListaCompra.objects.filter(lista=lista, produto=produto).first()
+                        if item_existente:
+                            messages.warning(request, f"O produto {produto.nome} já está na lista e não pode ser duplicado.")
+                        else:
+                            ItemListaCompra.objects.create(
+                                lista=lista,
+                                produto=produto,
+                                quantidade_desejada=qtd
+                            )
+                            registrar_log(lista, produto, request.user, 0, qtd)
+                            messages.success(request, f"Produto {produto.nome} adicionado à lista.")
 
-        # Atualizar ou excluir itens existentes
-        for item in itens:
-            nova_qtd = int(request.POST.get(f"item_{item.id}", item.quantidade_desejada))
+            # Atualizar ou excluir itens existentes
+            for item in itens:
+                nova_qtd = int(request.POST.get(f"item_{item.id}", item.quantidade_desejada))
+                if nova_qtd == 0:
+                    registrar_log(lista, item.produto, request.user, item.quantidade_desejada, 0)
+                    item.delete()
+                    messages.info(request, f"Produto {item.produto.nome} removido da lista.")
+                elif nova_qtd != item.quantidade_desejada:
+                    registrar_log(lista, item.produto, request.user, item.quantidade_desejada, nova_qtd)
+                    item.quantidade_desejada = nova_qtd
+                    item.save()
 
-            if nova_qtd == 0:
-                registrar_log(lista, item.produto, request.user, item.quantidade_desejada, 0)
-                item.delete()
-                messages.info(request, f"Produto {item.produto.nome} removido da lista.")
-            elif nova_qtd != item.quantidade_desejada:
-                registrar_log(lista, item.produto, request.user, item.quantidade_desejada, nova_qtd)
-                item.quantidade_desejada = nova_qtd
-                item.save()
+            messages.success(request, "Alterações salvas com sucesso!")
+            return redirect('detalhes_lista', id=lista.id)
 
-        return redirect('detalhes_lista', id=lista.id)
-
+    # Renderização padrão
     return render(request, 'compras/detalhes.html', {
         'lista': lista,
-        'itens': itens_com_preco,   # recebe itens com preço
+        'itens': itens_com_preco,
         'alteracoes': alteracoes,
         'fornecedores': fornecedores,
         'total_lista': total_lista,
+        'header_title': f"Detalhes da Lista {lista.numero}",
     })
 
 
@@ -325,7 +392,7 @@ def unir_listas(request):
             numero=numero,
             empresa=empresa_usuario,
             criado_por=request.user,
-            status="Em processo de consolidação"
+            status="EM_PROCESSO_CONSOLIDACAO"
         )
 
         # associa as listas selecionadas

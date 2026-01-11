@@ -1,22 +1,11 @@
 {% load static %}
-
 <header>
-  <div class="header-content">
-    <div class="logo">
-      <img src="{% static 'img/logo.png' %}" alt="Logo" style="height: 60px; vertical-align: middle; margin-right: 20px;">
-      <span>Projeto - Bolsa Futuro</span>
+  <div class="header-content"></div>
+    <div class="logo-container">
+      <img src="{% static 'img/logo-hidro.png' %}" alt="Logo" class="logo-img">
     </div>
-    <div>
-      {% if request.user.is_authenticated %}
-        <span>Bem-vindo, {{ request.user.username }}! </span>
-        <a href="{% url 'logout' %}" class="btn">Sair</a>
-        {# Dashboard se não estiver nela #}
-        {% if request.path != '/dashboard/' %}
-          <a href="{% url 'dashboard' %}" class="btn">Dashboard</a>
-        {% endif %}
-      {% else %}
-        <a href="{% url 'login' %}" class="btn">Login</a>
-      {% endif %}
-    </div>
+    {% if header_title %}
+      <h1 class="header-title">{{ header_title }}</h1>
+    {% endif %}
   </div>
 </header>

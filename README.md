@@ -42,7 +42,7 @@ Com isso, o sistema centraliza e simplifica os processos de compras e estoque, g
 
 ### Como rodar o projeto no windows
 #### No terminal do vs code digite:
-1. `git clone -b develop https://github.com/projetoempy/HIDROGEST.git` (baixa os arquivos do projeto)
+1. `git clone -b Jailson https://github.com/projetoempy/HIDROGEST.git` (baixa os arquivos do projeto)
 2. `cd HIDROGEST` (entra na pasta)
 3. `python -m venv .venv` (cria um ambiente virtual)
 4. `.venv/Scripts/activate` (ativa o ambiente virtual)

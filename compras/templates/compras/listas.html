@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="center">Listas de Compra</h2>
-
+<a href="{% url 'dashboard' %}" class="btn">Voltar</a>
   {% if request.user.tipo_usuario == "GESTOR_MATRIZ" or request.user.tipo_usuario == "GESTOR_FILIAL" %}
     <!-- Botão para criar nova lista -->
     <div class="center">
@@ -30,6 +29,7 @@
     <p><label for="principal">Listas:</label>
     <select name="principal" id="principal">
       <option value="">Todas</option>
+      <option value="principais" {% if request.GET.principal == "principais" %}selected{% endif %}>Principais</option>
       <option value="unidas" {% if request.GET.principal == "unidas" %}selected{% endif %}>Unidas</option>
     </select>
 
@@ -67,7 +67,11 @@
       <table>
         <thead>
           <tr>
-            <th>Selecionar</th>
+            <th>Selecionar 
+              {% if request.user.tipo_usuario == "GESTOR_MATRIZ" and tem_autorizada %}
+                <input type="checkbox" id="select-all">
+              {% endif %}
+            </th>
             <th>Número</th>
             <th>Empresa</th>
             <th>Status</th>
@@ -95,7 +99,7 @@
                 {% if lista.status == "EM_CRIACAO" %}
                   {% if request.user.tipo_usuario == "GESTOR_MATRIZ" or request.user.tipo_usuario == "GESTOR_FILIAL" %}
                   <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Detalhes</a>
-                  <a href="{% url 'excluir_lista' lista.id %}" class="btn alerta">Excluir</a>
+                  <a href="{% url 'excluir_lista' lista.id %}" class="btn alerta" onclick="return confirm('Tem certeza que deseja excluir esta lista?')">Excluir</a>
                   {% endif %}
                 {% elif lista.status == "EM_PROCESSO_AUTORIZACAO" %}
                   {% if request.user.tipo_usuario == "GERENTE_MATRIZ" or request.user.tipo_usuario == "GERENTE_FILIAL" %}
@@ -136,5 +140,5 @@
     </form>    
   {% else %}
     <p class="empty">Nenhuma lista cadastrada.</p>
-  {% endif %}  
+  {% endif %}
 {% endblock %}

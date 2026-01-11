@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="center">Cadastro de Estoque</h2>
   {% if messages %}
   <ul class="erro">
     {% for message in messages %}
@@ -9,6 +8,7 @@
     {% endfor %}
   </ul>
 {% endif %}
+<a href="{% url 'lista_estoques' %}" class="btn">Voltar</a>
   <form method="post" class="form-cadastro">
     {% csrf_token %}
     <div class="form-fields">

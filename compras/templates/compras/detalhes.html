@@ -1,12 +1,25 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
-  <h2 class="center">Detalhes da Lista {{ lista.numero }}</h2>
-  <p><strong>Empresa:</strong> {{ lista.empresa.nome }}</p>
-  <p><strong>Status:</strong> {{ lista.get_status_display }}</p>
-  <p><strong>Criado por:</strong> {{ lista.criado_por.username }}</p>
-  <p><strong>Data:</strong> {{ lista.data_criacao|date:"d/m/Y H:i" }}</p>
-
+  <a href="{% url 'lista_compras' %}" class="btn">Voltar</a>
+  <div class="row-4">
+    <div class="card">
+      <img src="{% static 'img/status_lista.png' %}" alt="Logo" class="card-img">
+      <p class="center">Status: {{ lista.get_status_display }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/empresa.png' %}" alt="Logo" class="card-img">
+      <p class="center">Empresa: {{ lista.empresa.nome }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/usuario.png' %}" alt="Logo" class="card-img">
+      <p class="center">Criado por: {{ lista.criado_por.username }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/calendario.png' %}" alt="Logo" class="card-img">
+      <p class="center">Data: {{ lista.data_criacao|date:"d/m/Y H:i" }} </p>
+    </div>
+  </div>
   {% if messages %}
     <ul class="erro">
       {% for message in messages %}
@@ -14,7 +27,6 @@
       {% endfor %}
     </ul>
   {% endif %}
-
   <form method="post">
     {% csrf_token %}    
     {% if lista.status == "EM_CRIACAO" %}
@@ -25,7 +37,6 @@
       {% if request.user.tipo_usuario == "GERENTE_MATRIZ" or request.user.tipo_usuario == "GERENTE_FILIAL" %}
         <button type="submit" name="AUTORIZADA" class="btn">Autorizar</button>
       {% endif %}
-
     {% elif lista.status == "EM_PROCESSO_CONSOLIDACAO" %}
       {% if request.user.tipo_usuario == "GERENTE_MATRIZ" %}
         <button type="submit" name="CONSOLIDADA" class="btn">Consolidar</button>
@@ -55,6 +66,7 @@
         <thead>
           <tr>
             <th>Produto</th>
+            <th>Fornecedor</th>
             <th>Preço Unitário</th>
             <th>Quantidade Atual</th>
             <th>Preço Total</th>
@@ -65,11 +77,12 @@
           {% for item in itens %}
             <tr>
               <td>{{ item.obj.produto.nome }}</td>
+              <td>{{ item.obj.produto.fornecedor.nome }}</td>
               <td>R$ {{ item.preco_unitario|floatformat:2 }}</td>
               <td>{{ item.obj.quantidade_desejada }}</td>
               <td>R$ {{ item.preco_total|floatformat:2 }}</td>
               <td>
-                {% if lista.status == "CONSOLIDADA" or lista.status == "RECEBIDA" or lista.status == "EM_ENTREGA" %}
+                {% if lista.status == "CONSOLIDADA" or lista.status == "RECEBIDA" or lista.status == "EM_ENTREGA" or lista.status == "EM_PROCESSO_COMPRA" %}
                   <!-- campo só leitura -->
                   <input type="number" value="{{ item.obj.quantidade_desejada }}" readonly>
                 {% else %}
@@ -80,7 +93,7 @@
             </tr>
           {% endfor %}
           <tr>
-            <td colspan="3" style="text-align: left;"><strong>Valor Total da Lista:</strong></td>
+            <td colspan="4" style="text-align: left;"><strong>Valor Total da Lista:</strong></td>
             <td> R$ {{ total_lista|floatformat:2 }}</td>
             <td>              
               
@@ -88,7 +101,7 @@
           </tr>
         </tbody>
       </table>
-      {% if lista.status != "CONSOLIDADA" and lista.status != "RECEBIDA" and lista.status != "EM_ENTREGA" %}
+      {% if lista.status != "CONSOLIDADA" and lista.status != "RECEBIDA" and lista.status != "EM_ENTREGA" and lista.status != "EM_PROCESSO_COMPRA" %}
         <h3>Adicionar Produtos</h3>
         {% for fornecedor in fornecedores %}
           <h4>{{ fornecedor.nome }} (CNPJ: {{ fornecedor.cnpj }})</h4>

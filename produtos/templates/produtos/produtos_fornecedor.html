@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="center">Lista de Produtos por Fornecedor</h2>
     {% if messages %}
       <ul class="erro">
         {% for message in messages %}
@@ -9,11 +8,18 @@
         {% endfor %}
       </ul>
     {% endif %}
+  <a href="{% url 'dashboard' %}" class="btn">Voltar</a>
+  <!-- Formulário de filtro por nome do produto -->
+  <form method="get" class="center">
+    <input type="text" name="produto_nome" placeholder="Buscar produto..." value="{{ filtro_nome }}">
+    <button type="submit" class="btn">Pesquisar</button>
+    <a href="{% url 'lista_produtos' %}" class="btn">Limpar</a>
+  </form>
 
   {% for fornecedor in fornecedores %}
     <h3>{{ fornecedor.nome }} (CNPJ: {{ fornecedor.cnpj }}) <a href="{% url 'cadastrar_produto_fornecedor' fornecedor.id %}" class="btn">Cadastrar Novo Produto</a></h3>
     
-    {% if fornecedor.produtos.all %}
+    {% if fornecedor.produtos_filtrados %}
       <table>
         <thead>
           <tr>
@@ -24,7 +30,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for produto in fornecedor.produtos.all %}
+          {% for produto in fornecedor.produtos_filtrados %}
             <tr>
               <td>{{ produto.nome }}</td>
               <td>R$ {{ produto.preco }}</td>

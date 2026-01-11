@@ -9,8 +9,22 @@ from django.contrib.auth.decorators import login_required
 
 @login_required(login_url='/login/')
 def lista_produtos(request):
+    filtro_nome = request.GET.get('produto_nome', '')
+
     fornecedores = Fornecedor.objects.all().prefetch_related('produtos')
-    return render(request, 'produtos/produtos_fornecedor.html', {'fornecedores': fornecedores})
+
+    # aplica filtro nos produtos de cada fornecedor
+    for fornecedor in fornecedores:
+        if filtro_nome:
+            fornecedor.produtos_filtrados = fornecedor.produtos.filter(nome__icontains=filtro_nome)
+        else:
+            fornecedor.produtos_filtrados = fornecedor.produtos.all()
+
+    return render(request, 'produtos/produtos_fornecedor.html', {
+        'fornecedores': fornecedores,
+        'filtro_nome': filtro_nome,
+        'header_title': 'Fornecedores e Produtos',
+    })
 
 @login_required(login_url='/login/')
 def cadastrar_produto(request, fornecedor_id=None):
@@ -41,7 +55,8 @@ def cadastrar_produto(request, fornecedor_id=None):
 
     return render(request, 'produtos/cadastro_produto.html', {
         'fornecedor': fornecedor,
-        'fornecedores': fornecedores
+        'fornecedores': fornecedores,
+        'header_title': 'Cadastrar Produto',
     })
 @login_required(login_url='/login/')
 def editar_produto(request, id):
@@ -56,7 +71,11 @@ def editar_produto(request, id):
         produto.save()
         messages.success(request, "Produto atualizado com sucesso!")
         return redirect('lista_produtos')
-    return render(request, 'produtos/cadastro_produto.html', {'produto': produto, 'fornecedores': fornecedores})
+    return render(request, 'produtos/cadastro_produto.html', {
+        'produto': produto, 
+        'fornecedores': fornecedores,
+        'header_title': 'Editar Produto',
+    })
 
 @login_required(login_url='/login/')
 def excluir_produto(request, id):

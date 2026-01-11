@@ -28,6 +28,20 @@ document.addEventListener("DOMContentLoaded", function () {
     checkboxes.forEach(chk => chk.addEventListener("change", toggle));
     toggle();
   }
+
+  // Selecionar todos os checkboxes
+  const selectAll = document.getElementById("select-all");
+  if (selectAll) {
+    selectAll.addEventListener("change", function () {
+      checkboxes.forEach(chk => {
+        chk.checked = selectAll.checked;
+      });
+      // Atualiza estado do botão "Unir Listas" também
+      if (btnUnir) {
+        btnUnir.disabled = document.querySelectorAll(".chk-lista:checked").length === 0;
+      }
+    });
+  }
 });
 
 // Carregar produtos por fornecedor (usado onde existe #produtos-container)

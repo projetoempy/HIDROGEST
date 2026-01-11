@@ -6,7 +6,10 @@ from django.contrib import messages
 
 def lista_empresas(request):
     empresas = Empresa.objects.all()
-    return render(request, 'empresas/empresas.html', {'empresas': empresas})
+    return render(request, 'empresas/empresas.html', {
+        'empresas': empresas,
+        'header_title': 'Empresas'
+    })
 
 def cadastrar_empresa(request):
     if request.method == "POST":
@@ -17,7 +20,9 @@ def cadastrar_empresa(request):
         Empresa.objects.create(nome=nome, email=email, telefone=telefone, endereco=endereco)
         messages.success(request, "Empresa cadastrada com sucesso!")
         return redirect('lista_empresas')
-    return render(request, 'empresas/cadastro_empresa.html')
+    return render(request, 'empresas/cadastro_empresa.html', {
+        'header_title': 'Cadastrar Empresa'
+    })
 
 def editar_empresa(request, id):
     empresa = get_object_or_404(Empresa, id=id)
@@ -29,7 +34,10 @@ def editar_empresa(request, id):
         empresa.save()
         messages.success(request, "Empresa atualizada com sucesso!")
         return redirect('lista_empresas')
-    return render(request, 'empresas/cadastro_empresa.html', {'empresa': empresa})
+    return render(request, 'empresas/cadastro_empresa.html', {
+        'empresa': empresa,
+        'header_title': 'Editar Empresa'
+        })
 
 def excluir_empresa(request, id):
     empresa = get_object_or_404(Empresa, id=id)

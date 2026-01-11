@@ -1,12 +1,29 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-  <h2 class="center">Dashboard</h2>
-  <p class="center">Tipo de usuário: {{ user.tipo_usuario }}</p>
-  <p class="center">Empresa: {{ user.empresa.nome }}</p>
+  <a href="{% url 'logout' %}" class="btn">Sair</a>
+
+  <div class="row">
+    <div class="card">
+      <img src="{% static 'img/usuario.png' %}" alt="Logo" class="card-img">
+      <p class="center">Tipo de usuário: {{ user.tipo_usuario }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/empresa.png' %}" alt="Logo" class="card-img">
+      <p class="center">Empresa: {{ user.empresa.nome }}</p>
+    </div>
+    <div class="card">
+      {% if request.user.is_authenticated %}
+        <img src="{% static 'img/login.png' %}" alt="Logo" class="card-img">
+        <p class="center">Bem-vindo, {{ request.user.username }}! </p>
+      {% endif %}
+    </div>
+  </div>
+
   <nav class="center">
     {% comment %} Navegação para os principais módulos {% endcomment %}
-    {% if user.tipo_usuario == 'GERENTE_MATRIZ' %}
+    {% if user.tipo_usuario == 'GERENTE_MATRIZ' or user.tipo_usuario == 'GESTOR_MATRIZ' %}
       <a href="{% url 'lista_empresas' %}" class="btn">Empresas</a>
       <a href="{% url 'lista_usuarios' %}" class="btn">Usuários</a>
       <a href="{% url 'lista_fornecedores' %}" class="btn">Fornecedores</a>
@@ -27,7 +44,6 @@
   {% endif %}
   {% if user.tipo_usuario == 'FUNCIONARIO' %}
     <h3 class="center">Estoque da Empresa</h3>
-
     {% if estoque %}
       <table>
         <thead>
@@ -68,16 +84,10 @@
       <input type="date" name="data_fim" id="data_fim" value="{{ request.GET.data_fim }}">
 
       <label for="produto">Produto:</label>
-      <select name="produto" id="produto">
-        <option value="">Todos</option>
-        {% for produto in produtos %}
-          <option value="{{ produto.id }}" {% if request.GET.produto == produto.id|stringformat:"s" %}selected{% endif %}>
-            {{ produto.nome }}
-          </option>
-        {% endfor %}
-      </select>
+      <input type="text" name="produto" id="produto" value="{{ request.GET.produto }}">
 
       <button type="submit" class="btn">Filtrar</button>
+      <a href="{% url 'dashboard' %}" class="btn alerta">Limpar</a>
     </form>
     <hr>
     <h3 class="center">Saídas Registradas</h3>

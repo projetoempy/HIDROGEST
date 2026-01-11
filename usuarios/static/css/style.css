@@ -28,54 +28,104 @@ p {
 
 /* === Header === */
 header {
-  z-index: 1000;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: #fff;
-  padding: 10px 0;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  margin: 10px;
+  position: relative;
+  height: 60px;
+  background-color: transparent;
 }
 
 .header-content {
-  max-width: 900px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
+  background-color: #9acb61;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  border-radius: 20px;
+  
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.logo-container {
+  position: absolute;
+  top: 50%;
+  left: 2rem;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.logo-img {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+}
+
+.header-title {
+  position: absolute;
+  right: 2rem;
+  color: white;
+  font-size: 2.2rem;
+  font-weight: 20;
+  z-index: 2;
+  top: -25%;
+  
 }
 
 /* === Container === */
 .container {
-  max-width: 900px;
-  margin: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.card-login {
   background-color: #fff;
-  padding: 60px 30px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 10px 15%;
+  
+}
+.card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 20px 0;
+  max-width: 150px;
+}
+
+.row {
+  margin-left: 25%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.row-4 {
+  margin-left: 16%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.card-img {
+  height: 30px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* === Footer === */
 footer {
+  color: white;
   position: relative;
   bottom: 0;
   margin: auto;
-  max-width: 900px;
-  background-color: #fff;
-  margin-top: 10px;
+  max-width: 100%;
+  background-color: #243b83;
+  margin-top: 30px;
   text-align: center;
   padding: 30px;
-  border-radius: 10px;
+  border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  height: 5px;
 }
 
 /* === Tabelas === */
@@ -105,16 +155,16 @@ tr:nth-child(even) {
   display: inline-block;
   margin-top: 20px;
   padding: 10px 20px;
-  background-color: #27ae60;
+  background-color: #a3c441;
   color: white;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: 15px;
   font-weight: bold;
   border: none;
 }
 
 .btn:hover {
-  background-color: #219150;
+  background-color: #243b83;
 }
 
 /* === Alertas === */
@@ -160,6 +210,7 @@ li {
 
 .form-login,
 .form-cadastro {
+  top: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -215,3 +266,61 @@ li {
 .fornecedor-header h2 {
   margin-bottom: 0;
 }
+
+.card-comparativo {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    width: 230px;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    padding: 3px;
+}
+
+.card-icon {
+    width: auto;
+    height: 54px;
+    margin-right: 6px;
+}
+
+.card-body-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+}
+
+.card-section {
+    flex: 1;
+    text-align: center;
+}
+
+.divisor-vertical {
+    width: 2px;
+    height: 80px;
+    background-color: #ccc;
+    margin: 0 5px;
+}
+
+.label {
+    font-size: 1em;
+    color: #666;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.valor {
+
+    font-size: 1.8em;
+}
+
+.valor.destaque {
+    font-size: 1.8em;
+    color: #333;
+}
+

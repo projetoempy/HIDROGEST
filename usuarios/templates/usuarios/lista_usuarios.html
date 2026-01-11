@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="center">Lista de Usuários</h2>
   {% if messages %}
     <ul class="erro">
       {% for message in messages %}
@@ -9,6 +8,7 @@
       {% endfor %}
     </ul>
   {% endif %}
+  <a href="{% url 'dashboard' %}" class="btn">Voltar</a>
   <table class="table">
     <thead>
       <tr>

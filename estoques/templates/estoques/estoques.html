@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="center">Controle de Estoques</h2>
   {% if messages %}
     <ul class="erro">
       {% for message in messages %}
@@ -10,25 +9,28 @@
     </ul>
   {% endif %}
 
-  <!-- Botão para adicionar novo item ao estoque -->
+  <!-- Botão voltar para dashboard -->
+   <a href="{% url 'dashboard' %}" class="btn">Voltar</a>
+
+  <!-- Formulário de filtro por nome do produto -->
+  <div class="center" style="margin-top: 20px;">
+    <form method="get">
+      <input type="text" name="produto" placeholder="Buscar produto..." value="{{ produto_nome }}">
+      <button type="submit" class="btn">Pesquisar</button>
+      <a href="{% url 'lista_estoques' %}" class="btn">Limpar</a>
+    </form>
+  </div>
   <div class="center">
     <a href="{% url 'adicionar_estoque' %}" class="btn">Adicionar Produto ao Estoque</a>
   </div>
-
-  <h3 class="center">Controle de Estoques</h3>
-
-  <form method="get" class="center" style="margin-bottom: 20px;">
-    <label for="produto">Pesquisar Produto:</label>
-    <input type="text" name="produto" id="produto" value="{{ produto_nome }}">
-    <button type="submit" class="btn">Filtrar</button>
-    <a href="{% url 'lista_estoques' %}" class="btn alerta">Limpar</a>
-  </form>
   <!-- Tabelas de estoques por empresa -->
   {% if estoques %}
     {% regroup estoques by empresa as estoques_por_empresa %}
-
     {% for grupo in estoques_por_empresa %}
-      <h3>{{ grupo.grouper.nome }}</h3>
+      <h3>
+        {{ grupo.grouper.nome }}
+        <a href="{% url 'ver_logs' grupo.grouper.id %}" class="btn">Ver Logs</a>
+      </h3>
       <table>
         <thead>
           <tr>

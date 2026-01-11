@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="center">Cadastro de Empresa</h2>
   <form method="post" class="form-cadastro">
     {% csrf_token %}
     <div class="form-fields">
@@ -23,5 +22,6 @@
       </p>
     </div>
     <button type="submit" class="btn">Salvar</button>
+    <a href="{% url 'lista_empresas' %}" class="btn">Voltar</a>
   </form>
 {% endblock %}

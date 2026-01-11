@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="center">Lista de Empresas</h2>
-  {% if messages %}
+   {% if messages %}
     <ul class="erro">
       {% for message in messages %}
         <li class="{{ message.tags }}">{{ message }}</li>
@@ -10,8 +9,10 @@
     </ul>
   {% endif %}
   <!-- Botão para cadastrar nova empresa -->
+   <a href="{% url 'dashboard' %}" class="btn">Voltar</a>
   <div class="center">
     <a href="{% url 'cadastrar_empresa' %}" class="btn">Cadastrar Nova Empresa</a>
+    
   </div>
 
   <!-- Tabela de empresas -->
