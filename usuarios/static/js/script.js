@@ -18,28 +18,62 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Habilitar/desabilitar botão "Unir Listas" (somente na página de listas)
+// Botões de listas
   const btnUnir = document.getElementById("btn-unir");
+  const btnEntregar = document.getElementById("btn-entregar");
   const checkboxes = document.querySelectorAll(".chk-lista");
-  if (btnUnir && checkboxes.length) {
-    const toggle = () => {
-      btnUnir.disabled = document.querySelectorAll(".chk-lista:checked").length === 0;
-    };
-    checkboxes.forEach(chk => chk.addEventListener("change", toggle));
-    toggle();
+  const selectAll = document.getElementById("select-all");
+
+  function selecionadas() {
+    return Array.from(checkboxes).filter(chk => chk.checked);
   }
 
-  // Selecionar todos os checkboxes
-  const selectAll = document.getElementById("select-all");
+  function atualizarBotoes() {
+    const sel = selecionadas();
+    if (btnUnir) btnUnir.disabled = false;            // sempre habilitado, backend valida
+    if (btnEntregar) btnEntregar.disabled = sel.length === 0; // habilita se houver >= 1
+  }
+
+  if (checkboxes.length) {
+    checkboxes.forEach(chk => chk.addEventListener("change", atualizarBotoes));
+    atualizarBotoes();
+  }
+
   if (selectAll) {
     selectAll.addEventListener("change", function () {
-      checkboxes.forEach(chk => {
-        chk.checked = selectAll.checked;
-      });
-      // Atualiza estado do botão "Unir Listas" também
-      if (btnUnir) {
-        btnUnir.disabled = document.querySelectorAll(".chk-lista:checked").length === 0;
+      checkboxes.forEach(chk => { chk.checked = selectAll.checked; });
+      atualizarBotoes();
+    });
+  }
+
+  // Ação do botão "Unir Listas" → mensagens pelo Django
+  if (btnUnir) {
+    btnUnir.addEventListener("click", function () {
+      // Se nenhuma lista for marcada, o backend mostrará messages.error
+      // O formulário será enviado vazio e tratado na view unir_listas
+    });
+  }
+
+  // Ação do botão "Enviar Itens" → mensagens pelo Django
+  if (btnEntregar) {
+    btnEntregar.addEventListener("click", function (e) {
+      e.preventDefault();
+      const sel = selecionadas();
+
+      if (sel.length === 0) {
+        document.getElementById("lista_id").value = "";
+        document.getElementById("form-entregar").submit();
+        return;
       }
+
+      if (sel.length > 1) {
+        document.getElementById("lista_id").value = "MULTIPLAS";
+        document.getElementById("form-entregar").submit();
+        return;
+      }
+
+      document.getElementById("lista_id").value = sel[0].value;
+      document.getElementById("form-entregar").submit();
     });
   }
 });

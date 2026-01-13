@@ -19,6 +19,7 @@ from datetime import date, timedelta
 def lista_estoques(request):
     usuario = request.user
     empresa_usuario = usuario.empresa
+    
 
     # Se for gerente ou gestor da matriz → vê todos os estoques
     if usuario.tipo_usuario in ["GERENTE_MATRIZ", "GESTOR_MATRIZ"]:
@@ -35,7 +36,7 @@ def lista_estoques(request):
         'estoques': estoques,
         'empresa_usuario': empresa_usuario,
         'produto_nome': produto_nome,
-        'header_title': 'Estoques'
+        'header_title': 'Estoques',
     })
 
 @login_required(login_url='/login/')

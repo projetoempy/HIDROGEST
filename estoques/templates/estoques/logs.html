@@ -108,6 +108,7 @@
             <th>Produto</th>
             <th>Quantidade</th>
             <th>Tipo</th>
+            <th>Destino</th>
         </tr>
     </thead>
     <tbody>
@@ -118,6 +119,13 @@
         <td>{{ log.produto.nome }}</td>
         <td>{{ log.quantidade }}</td>
         <td>{{ log.tipo }}</td>
+        <td>
+          {% if log.tipo == "Saída" %}
+            {{ log.destino.nome }}
+          {% else %}
+            {{ log.empresa.nome }}
+          {% endif %}
+        </td>
     </tr>
     {% endfor %}
 </tbody>

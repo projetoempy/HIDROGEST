@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -69,14 +70,9 @@ def lista_compras(request):
         listas = listas.filter(data_criacao__date__lte=data_fim)
 
     # Principais e unidas
-    principais, unidas = [], []
-    for lista in listas:
-        if lista.listas_unidas.exists():
-            lista.is_principal = True
-            principais.append(lista)
-        else:
-            lista.is_principal = False
-            unidas.append(lista)
+    principais = listas.filter(listas_unidas__isnull=False).distinct()
+    unidas = listas.filter(status="UNIDA")
+
 
     # aplica filtro de principal/unidas
     if principal == "principais":
@@ -84,11 +80,18 @@ def lista_compras(request):
     elif principal == "unidas":
         listas = unidas # só as listas unidas (que pertencem a uma principal)
 
+     # Correção
+    # Se 'listas' for um QuerySet, use .filter; se for lista Python, use 'any'
+    tem_autorizada = listas.filter(status="AUTORIZADA").exists()
+    tem_unida = listas.filter(status="UNIDA").exists()
+    tem_consolidada = listas.filter(status="CONSOLIDADA").exists()
+
+
     contexto = {
         'listas': listas,
-        'tem_autorizada': listas.filter(empresa=request.user.empresa, status="AUTORIZADA").exists() if hasattr(listas, 'filter') else False,
-        'tem_unida': listas.filter(empresa=request.user.empresa, status="UNIDA").exists() if hasattr(listas, 'filter') else False,
-        'tem_consolidada': listas.filter(empresa=request.user.empresa, status="CONSOLIDADA").exists() if hasattr(listas, 'filter') else False,
+        'tem_autorizada': tem_autorizada,
+        'tem_unida': tem_unida,
+        'tem_consolidada': tem_consolidada,
         'principais': principais,
         'unidas': unidas,
         'empresa_nome': empresa_nome,
@@ -291,6 +294,7 @@ def detalhes_lista(request, id):
                 LogRetirada.objects.create(
                     usuario=request.user,
                     empresa=request.user.empresa,
+                    destino = lista.empresa,
                     produto=item.produto,
                     quantidade=item.quantidade_desejada
                 )
@@ -371,7 +375,7 @@ def unir_listas(request):
 
     ids = request.POST.getlist("listas_selecionadas")
     if not ids:
-        messages.warning(request, "Selecione ao menos uma lista autorizada.")
+        messages.error(request, "Selecione ao menos uma lista autorizada para clicar em Unir Listas.")
         return redirect("lista_compras")
 
     # pega todas as listas autorizadas, independente da empresa
@@ -420,3 +424,57 @@ def unir_listas(request):
     messages.success(request, f"Lista {nova_lista.numero} criada para {empresa_usuario.nome} e listas unidas com sucesso.")
     return redirect("lista_compras")
 
+
+
+@login_required(login_url='/login/')
+def enviar_lista(request):
+    if request.method != "POST":
+        messages.error(request, "Operação inválida.")
+        return redirect("lista_compras")
+
+    lista_id = request.POST.get("lista_id")
+
+    # Nenhuma lista selecionada
+    if not lista_id or lista_id.strip() == "":
+        messages.error(request, "Nenhuma lista selecionada para enviar.")
+        return redirect("lista_compras")
+
+    # Mais de uma lista selecionada
+    if lista_id == "MULTIPLAS":
+        messages.error(request, "Erro: selecione apenas uma lista para enviar itens.")
+        return redirect("lista_compras")
+
+    # Busca a lista autorizada
+    lista = get_object_or_404(ListaCompra, id=lista_id, status="AUTORIZADA")
+
+    # Verifica estoque
+    itens = ItemListaCompra.objects.filter(lista=lista)
+    for item in itens:
+        estoque, _ = Estoque.objects.get_or_create(
+            empresa=request.user.empresa,
+            produto=item.produto,
+            defaults={'quantidade': 0, 'quantidade_minima': 0}
+        )
+        if estoque.quantidade < item.quantidade_desejada:
+            messages.error(request, f"Estoque insuficiente para {item.produto.nome}.")
+            return redirect("lista_compras")
+
+    # Deduz e registra retirada
+    for item in itens:
+        estoque = Estoque.objects.get(empresa=request.user.empresa, produto=item.produto)
+        estoque.quantidade -= item.quantidade_desejada
+        estoque.save()
+        LogRetirada.objects.create(
+            usuario=request.user,
+            empresa=request.user.empresa,
+            destino = lista.empresa,
+            produto=item.produto,
+            quantidade=item.quantidade_desejada
+        )
+
+    # Atualiza status da lista
+    lista.status = "EM_ENTREGA"
+    lista.save()
+
+    messages.success(request, f"Lista {lista.numero} enviada para entrega.")
+    return redirect("lista_compras")
