@@ -9,3 +9,15 @@
     {% endif %}
   </div>
 </header>
+<div class="container-logo-button">
+  <img src="{% static 'img/logo-sistema.png' %}" alt="Imagem centralizada" class="logo-sistema">
+  {% if request.user.is_authenticated %}
+    <div class="container-button">
+      <!-- Se estiver em página diferente da dashboard mostra o botão -->
+      {% if request.path != '/dashboard/' %}
+      <a href="{% url 'dashboard' %}" class="btn">Dashboard</a>
+      {% endif %}
+      <a href="{% url 'logout' %}" class="btn">Sair</a>
+    </div>
+  {% endif %}
+</div>

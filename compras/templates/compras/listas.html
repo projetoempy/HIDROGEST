@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<a href="{% url 'dashboard' %}" class="btn">Voltar</a>
 
 {% if request.user.tipo_usuario == "GESTOR_MATRIZ" or request.user.tipo_usuario == "GESTOR_FILIAL" %}
   <!-- Botão para criar nova lista -->

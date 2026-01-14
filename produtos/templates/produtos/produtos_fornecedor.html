@@ -8,7 +8,6 @@
         {% endfor %}
       </ul>
     {% endif %}
-  <a href="{% url 'dashboard' %}" class="btn">Voltar</a>
   <!-- Formulário de filtro por nome do produto -->
   <form method="get" class="center">
     <input type="text" name="produto_nome" placeholder="Buscar produto..." value="{{ filtro_nome }}">

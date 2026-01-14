@@ -10,7 +10,6 @@
   {% endif %}
 
   <!-- Botão voltar para dashboard -->
-   <a href="{% url 'dashboard' %}" class="btn">Voltar</a>
 
   <!-- Formulário de filtro por nome do produto -->
   <div class="center" style="margin-top: 20px;">
@@ -20,7 +19,7 @@
       <a href="{% url 'lista_estoques' %}" class="btn">Limpar</a>
     </form>
   </div>
-  <div class="center">
+  <div>
     <a href="{% url 'adicionar_estoque' %}" class="btn">Adicionar Produto ao Estoque</a>
   </div>
   <!-- Tabelas de estoques por empresa -->

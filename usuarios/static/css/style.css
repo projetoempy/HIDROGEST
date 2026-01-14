@@ -324,3 +324,21 @@ li {
     color: #333;
 }
 
+
+.container-button {
+  display: flex;
+  justify-content: flex-end; /* joga os botões para a direita dentro do bloco */
+  gap: 10px;                 /* espaço entre os botões */
+  
+}
+.logo-sistema {
+  max-width: 200px;          /* ajusta tamanho da imagem */
+  margin-top: 20px;
+}
+
+.container-logo-button {
+  display: flex;
+  justify-content: center;   /* centraliza o conteúdo principal */
+  align-items: center;       /* alinha verticalmente */
+  gap: 20px; 
+}

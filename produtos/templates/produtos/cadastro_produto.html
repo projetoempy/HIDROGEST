@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<a href="{% url 'lista_produtos' %}" class="btn">Voltar</a>
   <form method="post" class="form-cadastro">
     {% csrf_token %}
     <div class="form-fields">
