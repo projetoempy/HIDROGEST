@@ -38,6 +38,7 @@ def cadastrar_produto(request, fornecedor_id=None):
         nome = request.POST['nome']
         preco = request.POST['preco']
         descricao = request.POST.get('descricao', '')
+        imagem = request.FILES.get("imagem")
 
         if fornecedor:
             fornecedor_final = fornecedor
@@ -48,7 +49,8 @@ def cadastrar_produto(request, fornecedor_id=None):
             fornecedor=fornecedor_final,
             nome=nome,
             preco=preco,
-            descricao=descricao
+            descricao=descricao,
+            imagem=imagem,
         )
         messages.success(request, f"Produto cadastrado para o fornecedor {fornecedor_final.nome}!")
         return redirect('lista_produtos')
@@ -68,6 +70,10 @@ def editar_produto(request, id):
         produto.fornecedor = Fornecedor.objects.get(id=fornecedor_id)
         produto.preco = request.POST['preco']
         produto.descricao = request.POST.get('descricao', None)
+        
+        if 'imagem' in request.FILES:
+            produto.imagem = request.FILES['imagem']
+
         produto.save()
         messages.success(request, "Produto atualizado com sucesso!")
         return redirect('lista_produtos')

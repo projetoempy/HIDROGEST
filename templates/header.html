@@ -9,15 +9,32 @@
     {% endif %}
   </div>
 </header>
-<div class="container-logo-button">
+<nav class="center">
   <img src="{% static 'img/logo-sistema.png' %}" alt="Imagem centralizada" class="logo-sistema">
   {% if request.user.is_authenticated %}
-    <div class="container-button">
+    <div>
       <!-- Se estiver em página diferente da dashboard mostra o botão -->
       {% if request.path != '/dashboard/' %}
       <a href="{% url 'dashboard' %}" class="btn">Dashboard</a>
       {% endif %}
       <a href="{% url 'logout' %}" class="btn">Sair</a>
     </div>
+  
+  </nav>
+    <div class="row">
+    <div class="card">
+      <img src="{% static 'img/usuario.png' %}" alt="Logo" class="card-img">
+      <p class="center">Tipo de usuário: {{ user.tipo_usuario }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/empresa.png' %}" alt="Logo" class="card-img">
+      <p class="center">Empresa: {{ user.empresa.nome }}</p>
+    </div>
+    <div class="card">
+      {% if request.user.is_authenticated %}
+        <img src="{% static 'img/login.png' %}" alt="Logo" class="card-img">
+        <p class="center">Bem-vindo, {{ request.user.username }}! </p>
+      {% endif %}
+    </div>
+  </div>
   {% endif %}
-</div>

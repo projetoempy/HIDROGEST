@@ -37,7 +37,7 @@ header {
   background-color: #9acb61;
   height: 100%;
   width: 100%;
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   z-index: 1;
@@ -111,7 +111,16 @@ header {
   width: auto;
   object-fit: contain;
 }
-
+h3 {
+  background-color: #243b83;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  padding: 10px;
+}
 /* === Footer === */
 footer {
   color: white;
@@ -292,7 +301,8 @@ li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px;
+    padding: 1px;
+    margin: 1px;
 }
 
 .card-section {
@@ -305,6 +315,7 @@ li {
     height: 80px;
     background-color: #ccc;
     margin: 0 5px;
+    display: inline-block;
 }
 
 .label {
@@ -324,21 +335,8 @@ li {
     color: #333;
 }
 
-
-.container-button {
-  display: flex;
-  justify-content: flex-end; /* joga os botões para a direita dentro do bloco */
-  gap: 10px;                 /* espaço entre os botões */
-  
-}
 .logo-sistema {
   max-width: 200px;          /* ajusta tamanho da imagem */
   margin-top: 20px;
 }
 
-.container-logo-button {
-  display: flex;
-  justify-content: center;   /* centraliza o conteúdo principal */
-  align-items: center;       /* alinha verticalmente */
-  gap: 20px; 
-}

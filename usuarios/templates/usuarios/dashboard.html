@@ -3,22 +3,7 @@
 
 {% block content %}
 
-  <div class="row">
-    <div class="card">
-      <img src="{% static 'img/usuario.png' %}" alt="Logo" class="card-img">
-      <p class="center">Tipo de usuário: {{ user.tipo_usuario }}</p>
-    </div>
-    <div class="card">
-      <img src="{% static 'img/empresa.png' %}" alt="Logo" class="card-img">
-      <p class="center">Empresa: {{ user.empresa.nome }}</p>
-    </div>
-    <div class="card">
-      {% if request.user.is_authenticated %}
-        <img src="{% static 'img/login.png' %}" alt="Logo" class="card-img">
-        <p class="center">Bem-vindo, {{ request.user.username }}! </p>
-      {% endif %}
-    </div>
-  </div>
+
 
   <nav class="center">
     {% comment %} Navegação para os principais módulos {% endcomment %}
