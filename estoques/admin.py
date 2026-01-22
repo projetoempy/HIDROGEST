@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import Estoque, LogRetirada
+from .models import Estoque, LogRetirada, LogEntrada
 
 @admin.register(Estoque)
 class EstoqueAdmin(admin.ModelAdmin):
@@ -11,6 +11,12 @@ class EstoqueAdmin(admin.ModelAdmin):
 
 @admin.register(LogRetirada)
 class LogRetiradaAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'empresa', 'produto', 'quantidade', 'data_hora')
+    list_filter = ('empresa', 'usuario')
+    search_fields = ('produto__nome', 'usuario__username')
+
+@admin.register(LogEntrada)
+class LogEntradaAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'empresa', 'produto', 'quantidade', 'data_hora')
     list_filter = ('empresa', 'usuario')
     search_fields = ('produto__nome', 'usuario__username')
