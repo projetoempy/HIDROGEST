@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if request.user.tipo_usuario == "GESTOR_MATRIZ" or request.user.tipo_usuario == "GESTOR_FILIAL" %}
+  <!-- Botão para criar nova lista -->
+  <div class="center">
+    <a href="{% url 'criar_lista' %}" class="btn">Criar Nova Lista</a>
+  </div>
+{% endif %}
+
+{% if tem_autorizada and request.user.tipo_usuario != "GESTOR_MATRIZ" %}
+  <span class="erro">Aguardando o Gestor da matriz unir as listas.</span>
+{% endif %}
+{% if tem_unida and request.user.tipo_usuario != "GERENTE_MATRIZ" %}
+  <span class="erro">Aguardando o Gerente da matriz consolidar a lista.</span>
+{% endif %}
+{% if tem_consolidada and request.user.tipo_usuario != "GESTOR_MATRIZ" %}
+  <span class="erro">Aguardando o Gestor da matriz processar a compra.</span>
+{% endif %}
+
+{% if messages %}
+  <ul class="erro">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<h3 class="center">Filtro de Pesquisa</h3>
+<form method="get" class="center" style="margin-bottom: 20px;">
+  <p>
+    <label for="principal">Listas:</label>
+    <select name="principal" id="principal">
+      <option value="">Todas</option>
+      <option value="principais" {% if request.GET.principal == "principais" %}selected{% endif %}>Principais</option>
+      <option value="unidas" {% if request.GET.principal == "unidas" %}selected{% endif %}>Unidas</option>
+    </select>
+
+    <label for="empresa">Empresa:</label>
+    <input type="text" name="empresa" id="empresa" value="{{ empresa_nome }}">
+
+    <label for="status">Status:</label>
+    <select name="status" id="status">
+      <option value="">Todos</option>
+      <option value="EM_CRIACAO" {% if status_filtro == "EM_CRIACAO" %}selected{% endif %}>Em Criação</option>
+      <option value="AUTORIZADA" {% if status_filtro == "AUTORIZADA" %}selected{% endif %}>Autorizada</option>
+      <option value="UNIDA" {% if status_filtro == "UNIDA" %}selected{% endif %}>Unida</option>
+      <option value="CONSOLIDADA" {% if status_filtro == "CONSOLIDADA" %}selected{% endif %}>Consolidada</option>
+      <option value="EM_PROCESSO_COMPRA" {% if status_filtro == "EM_PROCESSO_COMPRA" %}selected{% endif %}>Em Processo de Compra</option>
+      <option value="EM_ENTREGA" {% if status_filtro == "EM_ENTREGA" %}selected{% endif %}>Em Rota de Entrega</option>
+      <option value="RECEBIDA" {% if status_filtro == "RECEBIDA" %}selected{% endif %}>Itens Recebidos</option>
+    </select>
+  </p>
+
+  <p>
+    <label for="data_inicio">Data Início:</label>
+    <input type="date" name="data_inicio" id="data_inicio" value="{{ data_inicio }}">
+
+    <label for="data_fim">Data Fim:</label>
+    <input type="date" name="data_fim" id="data_fim" value="{{ data_fim }}">
+  </p>
+
+  <button type="submit" class="btn">Filtrar</button>
+  <a href="{% url 'lista_compras' %}" class="btn alerta">Limpar</a>
+</form>
+
+<!-- Tabela de listas -->
+{% if listas %}
+  <form method="post" action="{% url 'unir_listas' %}" style="display:inline;" id="form-unir">
+    {% csrf_token %}
+    {% if request.user.tipo_usuario == "GESTOR_MATRIZ" and tem_autorizada %}
+      <button type="submit" id="btn-unir" class="btn alerta">Unir Listas</button>
+      <button type="button" id="btn-entregar" class="btn">Enviar Itens</button>
+    {% endif %}
+    <table>
+      <thead>
+        <tr>
+          <th>Selecionar
+            {% if request.user.tipo_usuario == "GESTOR_MATRIZ" and tem_autorizada %}
+              <input type="checkbox" id="select-all">
+            {% endif %}
+          </th>
+          <th>Número</th>
+          <th>Empresa</th>
+          <th>Status</th>
+          <th>Criado por</th>
+          <th>Data</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lista in listas %}
+          <tr>
+            <td>
+              {% if lista.status == "AUTORIZADA" and request.user.tipo_usuario == "GESTOR_MATRIZ" %}
+                <input type="checkbox" name="listas_selecionadas" value="{{ lista.id }}" class="chk-lista">
+              {% endif %}
+            </td>
+            <td>{{ lista.numero }}</td>
+            <td>{{ lista.empresa.nome }}</td>
+            <td>{{ lista.get_status_display }}</td>
+            <td>{{ lista.criado_por.username }}</td>
+            <td>{{ lista.data_criacao|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if lista.status == "EM_CRIACAO" %}
+                {% if request.user.tipo_usuario in "GESTOR_MATRIZ GESTOR_FILIAL" %}
+                  <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Detalhes</a>
+                  <a href="{% url 'excluir_lista' lista.id %}" class="btn alerta" onclick="return confirm('Tem certeza que deseja excluir esta lista?')">Excluir</a>
+                {% endif %}
+              {% elif lista.status == "EM_PROCESSO_AUTORIZACAO" %}
+                {% if request.user.tipo_usuario in "GERENTE_MATRIZ GERENTE_FILIAL" %}
+                  <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Detalhes</a>
+                {% endif %}
+              {% elif lista.status == "AUTORIZADA" and request.user.tipo_usuario == "GESTOR_MATRIZ" %}
+                <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Detalhes</a>
+              {% elif lista.status == "UNIDA" %}
+                <!-- nenhuma ação disponível -->
+              {% elif lista.status == "EM_PROCESSO_CONSOLIDACAO" and request.user.tipo_usuario == "GERENTE_MATRIZ" %}
+                <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Detalhes</a>
+              {% elif lista.status == "CONSOLIDADA" and request.user.tipo_usuario == "GESTOR_MATRIZ" %}
+                {% if lista.listas_unidas.exists %}
+                  <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Detalhes</a>
+                {% endif %}
+              {% elif lista.status == "EM_PROCESSO_COMPRA" and request.user.tipo_usuario == "GESTOR_MATRIZ" %}
+                {% if lista.listas_unidas.exists %}
+                  <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Receber</a>
+                {% else %}
+                  <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Enviar</a>
+                {% endif %}
+              {% else %}
+                <a href="{% url 'detalhes_lista' lista.id %}" class="btn">Detalhes</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
+
+  <form method="post" action="{% url 'enviar_lista' %}" id="form-entregar" style="display:inline;">
+    {% csrf_token %}
+    <input type="hidden" name="lista_id" id="lista_id">
+  </form>
+{% else %}
+  <p class="empty">Nenhuma lista cadastrada.</p>
+{% endif %}
+
+{% endblock %}

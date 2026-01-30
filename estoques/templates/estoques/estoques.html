@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <!-- Botão voltar para dashboard -->
+
+  <!-- Formulário de filtro por nome do produto -->
+  <div class="center" style="margin-top: 20px;">
+    <form method="get">
+      <input type="text" name="produto" placeholder="Buscar produto..." value="{{ produto_nome }}">
+      <button type="submit" class="btn">Pesquisar</button>
+      <a href="{% url 'lista_estoques' %}" class="btn">Limpar</a>
+    </form>
+  </div>
+  <div>
+    <a href="{% url 'adicionar_estoque' %}" class="btn">Adicionar Produto ao Estoque</a>
+  </div>
+  <!-- Tabelas de estoques por empresa -->
+  {% if estoques %}
+    {% regroup estoques by empresa as estoques_por_empresa %}
+    {% for grupo in estoques_por_empresa %}
+      <h3>
+        {{ grupo.grouper.nome }}
+        
+      </h3>
+      <a href="{% url 'ver_logs' grupo.grouper.id %}" class="btn" style="margin-top: 0px;">Ver Logs</a>
+      <div class="row-4">
+  {% for estoque in grupo.list %}
+    <div class="card-comparativo" {% if estoque.quantidade < estoque.quantidade_minima %} style="background-color: rgb(255, 165, 192); font-weight: bold;" {% endif %}>
+      <div class="card-header">
+        {% if estoque.produto.imagem %}
+          <img src="{{ estoque.produto.imagem.url }}" alt="{{ estoque.produto.nome }}" class="card-icon">
+        {% else %}
+          <img src="{% static 'img/sem-imagem.png' %}" alt="Sem imagem" class="card-icon">
+        {% endif %}
+        <h4>{{ estoque.produto.nome }}</h4>
+      </div>
+      <div class="card-body-horizontal">
+        <div class="card-section">
+          <span class="label">Quantidade</span>
+          <span class="valor destaque">{{ estoque.quantidade }}</span>
+        </div>
+        <div class="divisor-vertical"></div>
+        <div class="card-section">
+          <span class="label">Mínimo</span>
+          <span class="valor">{{ estoque.quantidade_minima }}</span>
+        </div>
+        <div class="divisor-vertical"></div>
+        <div class="card-section">
+          {% if empresa_usuario == estoque.empresa %}
+          
+            <a href="{% url 'editar_estoque' estoque.id %}" class="btn">Edit</a>
+            <a href="{% url 'excluir_estoque' estoque.id %}" class="btn alerta"
+               onclick="return confirm('Tem certeza que deseja excluir este estoque?');">
+              Del
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">Nenhum estoque cadastrado.</p>
+  {% endif %}
+{% endblock %}

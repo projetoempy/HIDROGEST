@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form method="post" class="form-cadastro" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-fields">
+      <p>
+        <label for="fornecedor">Fornecedor</label>
+        {% if fornecedor.nome == None %}
+          <select name="fornecedor" id="fornecedor" required>
+            {% for fornecedor in fornecedores %}
+              <option value="{{ fornecedor.id }}"
+                {% if produto.fornecedor.id == fornecedor.id %}selected{% endif %}>
+                {{ fornecedor.nome }}
+              </option>
+            {% endfor %}
+          </select>
+        {% else %}
+          <!-- campo oculto para enviar o ID -->
+          <input type="hidden" name="fornecedor" id="fornecedor" value="{{ fornecedor.id }}">
+          <!-- texto fixo mostrando o nome -->
+          <span class="erro">{{ fornecedor.nome }}</span>
+        {% endif %}
+      </p>
+
+      <p>
+        <label for="nome">Nome</label>
+        <input type="text" name="nome" id="nome" value="{{ produto.nome|default:'' }}" required>
+      </p>
+
+      <p>
+        <label for="preco">Preço</label>
+        <input type="number" step="0.01" name="preco" id="preco" value="{{ produto.preco|default:'' }}" required>
+      </p>
+
+      <p>
+        <label for="descricao">Descrição</label>
+        <textarea name="descricao" id="descricao">{{ produto.descricao|default:'' }}</textarea>
+      </p>
+
+      <p>
+        <label for="imagem">Imagem do Produto</label>
+        <input type="file" name="imagem" id="imagem" accept="image/*">
+      </p>
+    </div>
+
+    <button type="submit" class="btn">Salvar</button>
+  </form>
+{% endblock %}

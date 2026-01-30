@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form method="post" class="form-cadastro">
+    {% csrf_token %}
+    <div class="form-fields">
+      <p>
+        <label for="nome">Nome</label>
+        <input type="text" name="nome" id="nome" value="{{ fornecedor.nome|default:'' }}" required>
+      </p>
+      <p>
+        <label for="cnpj">CNPJ</label>
+        <input type="text" name="cnpj" id="cnpj" value="{{ fornecedor.cnpj|default:'' }}" required pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}" title="Digite no formato 00.000.000/0000-00">
+      </p>
+      <p>
+        <label for="email">E-mail</label>
+        <input type="email" name="email" id="email" value="{{ fornecedor.email|default:'' }}" required>
+      </p>
+      <p>
+        <label for="telefone">Telefone</label>
+        <input type="text" name="telefone" id="telefone" value="{{ fornecedor.telefone|default:'' }}" required>
+      </p>
+      <p>
+        <label for="endereco">Endereço</label>
+        <input type="text" name="endereco" id="endereco" value="{{ fornecedor.endereco|default:'' }}" required>
+      </p>
+      <p>
+        <label for="site">Site</label>
+        <input type="url" name="site" id="site" value="{{ fornecedor.site|default:'' }}">
+      </p>
+    </div>
+    <button type="submit" class="btn">Salvar</button>
+  </form>
+{% endblock %}

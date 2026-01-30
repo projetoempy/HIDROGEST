@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h2 class="center"></h2>
+    <div class="card-login">
+    <form method="post" class="form-login">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="username">Usuário</label>
+        <input type="text" name="username" id="username" class="input-field" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input type="password" name="password" id="password" class="input-field" required>
+      </div>
+      <button type="submit" class="btn">Entrar</button>
+    </form>
+    </div>
+  {% if messages %}
+    <div class="erro">
+      {% for message in messages %}
+        <p>{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <p class="center">Não tem conta? <a href="{% url 'cadastro_usuario' %}">Cadastre-se aqui</a></p>
+{% endblock %}

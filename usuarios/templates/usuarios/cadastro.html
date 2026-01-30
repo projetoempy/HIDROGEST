@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="center"></h2>
+  <div class="card-login">
+    <form method="post" class="form-cadastro">
+      {% csrf_token %}
+      <div class="form-fields">
+        <p>
+          <label for="username">Usuário</label>
+          <input type="text" name="username" id="username" required>
+        </p>
+        <p>
+          <label for="email">E-mail</label>
+          <input type="email" name="email" id="email" required>
+        </p>
+        <p>
+          <label for="password1">Senha</label>
+          <input type="password" name="password1" id="password1" required>
+        </p>
+        <p>
+          <label for="password2">Confirmar Senha</label>
+          <input type="password" name="password2" id="password2" required>
+        </p>
+        <p>
+          <label for="empresa">Empresa</label>
+          <select name="empresa" id="empresa">
+            {% for empresa in empresas %}
+              <option value="{{ empresa.id }}">{{ empresa.nome }}</option>
+            {% endfor %}
+          </select>
+        </p>
+      </div>
+      <button type="submit" class="btn">Cadastrar</button>
+      <a href="{% url 'login' %}" class="btn">Fazer Login</a>
+    </form>
+  </div>
+  {% if messages %}
+    <div class="erro">
+      {% for message in messages %}
+        <p>{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

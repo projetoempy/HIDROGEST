@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <div class="row-4">
+    <div class="card">
+      <img src="{% static 'img/status_lista.png' %}" alt="Logo" class="card-img">
+      <p class="center">Status: {{ lista.get_status_display }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/empresa.png' %}" alt="Logo" class="card-img">
+      <p class="center">Empresa: {{ lista.empresa.nome }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/usuario.png' %}" alt="Logo" class="card-img">
+      <p class="center">Criado por: {{ lista.criado_por.username }}</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'img/calendario.png' %}" alt="Logo" class="card-img">
+      <p class="center">Data: {{ lista.data_criacao|date:"d/m/Y H:i" }} </p>
+    </div>
+  </div>
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}    
+    {% if lista.status == "EM_CRIACAO" %}
+      {% if request.user.tipo_usuario == "GESTOR_MATRIZ" or request.user.tipo_usuario == "GESTOR_FILIAL" %}
+        <button type="submit" name="solicitar_autorizacao" class="btn alerta">Solicitar Autorização</button>
+      {% endif %}
+    {% elif lista.status == "EM_PROCESSO_AUTORIZACAO" %}
+      {% if request.user.tipo_usuario == "GERENTE_MATRIZ" or request.user.tipo_usuario == "GERENTE_FILIAL" %}
+        <button type="submit" name="AUTORIZADA" class="btn">Autorizar</button>
+      {% endif %}
+    {% elif lista.status == "EM_PROCESSO_CONSOLIDACAO" %}
+      {% if request.user.tipo_usuario == "GERENTE_MATRIZ" %}
+        <button type="submit" name="CONSOLIDADA" class="btn">Consolidar</button>
+      {% endif %}
+    {% elif lista.status == "CONSOLIDADA" %}
+      {% if request.user.tipo_usuario == "GESTOR_MATRIZ" %}
+        <button type="submit" name="EM_PROCESSO_COMPRA" class="btn alerta">Processar Compra</button>
+      {% endif %}
+    {% elif lista.status == "EM_PROCESSO_COMPRA" %}
+      {% if request.user.tipo_usuario == "GESTOR_MATRIZ" %}
+        {% if lista.listas_unidas.exists %}
+          <button type="submit" name="RECEBIDA" class="btn">Receber itens</button>
+        {% else %}
+          <button type="submit" name="EM_ENTREGA" class="btn">Enviar itens</button>
+        {% endif %}
+      {% endif %}
+    {% elif lista.status == "EM_ENTREGA" %}
+      {% if request.user.tipo_usuario == "GESTOR_FILIAL" %}
+        <button type="submit" name="RECEBIDA" class="btn">Confirmar Recebimento</button>
+      {% endif %}
+    {% else %}
+      <p>Nenhuma ação disponível para este status.</p>
+    {% endif %}
+    <h3>Itens da Lista</h3>
+    {% if itens %}
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Fornecedor</th>
+            <th>Preço Unitário</th>
+            <th>Quantidade Atual</th>
+            <th>Preço Total</th>
+            <th>Nova Quantidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in itens %}
+            <tr>
+              <td>{{ item.obj.produto.nome }}</td>
+              <td>{{ item.obj.produto.fornecedor.nome }}</td>
+              <td>R$ {{ item.preco_unitario|floatformat:2 }}</td>
+              <td>{{ item.obj.quantidade_desejada }}</td>
+              <td>R$ {{ item.preco_total|floatformat:2 }}</td>
+              <td>
+                {% if lista.status == "CONSOLIDADA" or lista.status == "RECEBIDA" or lista.status == "EM_ENTREGA" or lista.status == "EM_PROCESSO_COMPRA" %}
+                  <!-- campo só leitura -->
+                  <input type="number" value="{{ item.obj.quantidade_desejada }}" readonly>
+                {% else %}
+                  <input type="number" name="item_{{ item.obj.id }}" min="0"
+                        value="{{ item.obj.quantidade_desejada }}">
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <td colspan="4" style="text-align: left;"><strong>Valor Total da Lista:</strong></td>
+            <td> R$ {{ total_lista|floatformat:2 }}</td>
+            <td>              
+              
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      {% if lista.status != "CONSOLIDADA" and lista.status != "RECEBIDA" and lista.status != "EM_ENTREGA" and lista.status != "EM_PROCESSO_COMPRA" %}
+        <h3>Adicionar Produtos</h3>
+        {% for fornecedor in fornecedores %}
+          <h4>{{ fornecedor.nome }} (CNPJ: {{ fornecedor.cnpj }})</h4>
+          {% if fornecedor.produtos.all %}
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Preço</th>
+                  <th>Descrição</th>
+                  <th>Quantidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for produto in fornecedor.produtos.all %}
+                  <tr>
+                    <td>{{ produto.nome }}</td>
+                    <td>R$ {{ produto.preco }}</td>
+                    <td>{{ produto.descricao|default:"-" }}</td>
+                    <td>
+                      <input type="number" name="produto_{{ produto.id }}" min="0" value="0">
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="empty">Nenhum produto cadastrado para este fornecedor.</p>
+          {% endif %}
+          <hr>
+        {% endfor %}
+        
+          <button type="submit" class="btn">Salvar Alterações</button>
+      {% endif %}
+      {% else %}
+        <p class="empty">Nenhum item nesta lista.</p>
+      {% endif %}
+  </form>
+
+    <h3>Log de Alterações</h3>
+    {% if alteracoes %}
+      <ul>
+        {% for log in alteracoes %}
+          <li>
+            {{ log.data_hora|date:"d/m/Y H:i" }} - {{ log.alterado_por.username }}
+            alterou {{ log.produto.nome }} de {{ log.quantidade_antiga }} para {{ log.quantidade_nova }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">Nenhuma alteração registrada.</p>
+    {% endif %}
+  {% endblock %}

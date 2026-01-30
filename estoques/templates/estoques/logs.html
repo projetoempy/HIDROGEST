@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="row">
+    <div class="card-comparativo">
+        <div class="card-body-horizontal">
+            <div class="card-section">
+                <span class="label">Entrada</span>
+                <span class="valor">{{ cards.ano.entrada.atual }}</span>
+            </div>
+            <div class="divisor-vertical"></div>
+            <div class="card-section">
+                <span class="label">Saída</span>
+                <span class="valor destaque">{{ cards.ano.saida.atual }}</span>
+            </div>
+            <div class="card-header">
+                {% if cards.ano.entrada.atual > cards.ano.saida.atual %}
+                    <img src="{% static 'img/seta_cima.png' %}" alt="Ícone" class="card-icon">
+                {% elif cards.ano.entrada.atual < cards.ano.saida.atual %}
+                    <img src="{% static 'img/seta_baixo.png' %}" alt="Ícone" class="card-icon">
+                {% else %}
+                    <img src="{% static 'img/seta_meio.png' %}" alt="Ícone" class="card-icon">
+                {% endif %}
+            </div>
+            <h4>Ano</h4>
+        </div>
+    </div>
+    <div class="card-comparativo">
+        <div class="card-body-horizontal">
+            <div class="card-section">
+                <span class="label">Entrada</span>
+                <span class="valor">{{ cards.mes.entrada.atual }}</span>
+            </div>
+            <div class="divisor-vertical"></div>
+            <div class="card-section">
+                <span class="label">Saída</span>
+                <span class="valor destaque">{{ cards.mes.saida.atual }}</span>
+            </div>
+            <div class="card-header">
+                {% if cards.mes.entrada.atual > cards.mes.saida.atual %}
+                    <img src="{% static 'img/seta_cima.png' %}" alt="Ícone" class="card-icon">
+                {% elif cards.mes.entrada.atual < cards.mes.saida.atual %}
+                    <img src="{% static 'img/seta_baixo.png' %}" alt="Ícone" class="card-icon">
+                {% else %}
+                    <img src="{% static 'img/seta_meio.png' %}" alt="Ícone" class="card-icon">
+                {% endif %}
+            </div>
+            <h4>Mês</h4>
+        </div>
+    </div>
+    <div class="card-comparativo">
+        <div class="card-body-horizontal">
+            <div class="card-section">
+                <span class="label">Entrada</span>
+                <span class="valor">{{ cards.semana.entrada.atual }}</span>
+            </div>
+            <div class="divisor-vertical"></div>
+            <div class="card-section">
+                <span class="label">Saída</span>
+                <span class="valor destaque">{{ cards.semana.saida.atual }}</span>
+            </div>
+            <div class="card-header">
+                {% if cards.semana.entrada.atual > cards.semana.saida.atual %}
+                    <img src="{% static 'img/seta_cima.png' %}" alt="Ícone" class="card-icon">
+                {% elif cards.semana.entrada.atual < cards.semana.saida.atual %}
+                    <img src="{% static 'img/seta_baixo.png' %}" alt="Ícone" class="card-icon">
+                {% else %}
+                    <img src="{% static 'img/seta_meio.png' %}" alt="Ícone" class="card-icon">
+                {% endif %}
+            </div>
+            <h4>Semana</h4>
+        </div>
+    </div>
+</div>
+
+<h2>Logs da Empresa {{ empresa.nome }}</h2>
+
+<!-- Filtros -->
+<form method="get" class="form-filtros center">
+    <label>Tipo:</label>
+    <select name="tipo">
+        <option value="">Todos</option>
+        <option value="entrada" {% if tipo == "entrada" %}selected{% endif %}>Entradas</option>
+        <option value="saida" {% if tipo == "saida" %}selected{% endif %}>Saídas</option>
+    </select>
+
+    <label>Funcionário:</label>
+    <input type="text" name="funcionario" value="{{ funcionario }}">
+
+    <label>Data Início:</label>
+    <input type="date" name="data_inicio" value="{{ data_inicio }}">
+
+    <label>Data Fim:</label>
+    <input type="date" name="data_fim" value="{{ data_fim }}">
+
+    <button type="submit" class="btn">Filtrar</button>
+    <a href="{% url 'ver_logs' empresa.id %}" class="btn">Limpar</a>
+</form>
+
+<!-- Tabela de Logs -->
+{% if logs %}
+<table>
+    <thead>
+        <tr>
+            <th>Data/Hora</th>
+            <th>Usuário</th>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Tipo</th>
+            <th>Destino</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.data_hora|date:"d/m/Y H:i" }}</td>
+        <td>{{ log.usuario.username }}</td>
+        <td>{{ log.produto.nome }}</td>
+        <td>{{ log.quantidade }}</td>
+        <td>{{ log.tipo }}</td>
+        <td>
+          {% if log.tipo == "Saída" %}
+            {{ log.destino.nome }}
+          {% else %}
+            {{ log.empresa.nome }}
+          {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+{% else %}
+<p class="empty">Nenhum log encontrado.</p>
+{% endif %}
+{% endblock %}

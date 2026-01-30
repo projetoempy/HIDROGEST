@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form method="post" class="form-cadastro">
+    {% csrf_token %}
+    <div class="form-fields">
+      <p>
+        <label for="nome">Nome</label>
+        <input type="text" name="nome" id="nome" value="{{ empresa.nome|default:'' }}" required>
+      </p>
+      <p>
+        <label for="email">E-mail</label>
+        <input type="email" name="email" id="email" value="{{ empresa.email|default:'' }}" required>
+      </p>
+      <p>
+        <label for="telefone">Telefone</label>
+        <input type="text" name="telefone" id="telefone" value="{{ empresa.telefone|default:'' }}" required>
+      </p>
+      <p>
+        <label for="endereco">Endereço</label>
+        <input type="text" name="endereco" id="endereco" value="{{ empresa.endereco|default:'' }}" required>
+      </p>
+    </div>
+    <button type="submit" class="btn">Salvar</button>
+    <a href="{% url 'lista_empresas' %}" class="btn">Voltar</a>
+  </form>
+{% endblock %}

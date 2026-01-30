@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% if messages %}
+  <ul class="erro">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+  <form method="post" class="form-cadastro">
+    {% csrf_token %}
+    <div class="form-fields">
+      <p>
+        <label for="empresa">Empresa</label>
+        <!-- campo oculto para enviar o ID -->
+        <input type="hidden" name="empresa" id="empresa" value="{{ empresa.id }}">
+        <!-- texto fixo mostrando o nome -->
+        <span>{{ empresa.nome }}</span>
+
+      </p>
+      <p>
+        <label for="produto">Produto</label>
+        <select name="produto" id="produto" required>
+          {% for produto in produtos %}
+            <option value="{{ produto.id }}"
+              {% if estoque.produto.id == produto.id %}selected{% endif %}>
+              {{ produto.nome }}
+            </option>
+          {% endfor %}
+        </select>
+      </p>
+      <p>
+        <label for="quantidade">Quantidade</label>
+        <input type="number" name="quantidade" id="quantidade" value="{{ estoque.quantidade|default:'' }}" required>
+      </p>
+      <p>
+        <label for="quantidade_minima">Quantidade Mínima</label>
+        <input type="number" name="quantidade_minima" id="quantidade_minima" value="{{ estoque.quantidade_minima|default:'' }}" required>
+      </p>
+    </div>
+    {% if empresa.id == '' %}
+      <p style="color: crimson;">Nenhuma empresa associada. Por favor, fale com o gerente da matriz.</p>
+    {% else %}
+      <button type="submit" class="btn">Salvar</button>
+    {% endif %}
+  </form>
+{% endblock %}

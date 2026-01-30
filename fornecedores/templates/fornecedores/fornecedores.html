@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <!-- Botão para cadastrar novo fornecedor -->
+  <div>
+    <a href="{% url 'cadastrar_fornecedor' %}" class="btn">Cadastrar Novo Fornecedor</a>
+  </div>
+
+  <!-- Tabela de fornecedores -->
+  {% if fornecedores %}
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>CNPJ</th>
+          <th>E-mail</th>
+          <th>Telefone</th>
+          <th>Endereço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fornecedor in fornecedores %}
+          <tr>
+            <td>{{ fornecedor.nome }}</td>
+            <td>{{ fornecedor.cnpj }}</td>
+            <td>{{ fornecedor.email }}</td>
+            <td>{{ fornecedor.telefone }}</td>
+            <td>{{ fornecedor.endereco }}</td>
+            <td>
+              <a href="{% url 'cadastrar_produto_fornecedor' fornecedor.id %}" class="btn">Cadastrar Produto</a>
+              <a href="{% url 'editar_fornecedor' fornecedor.id %}" class="btn">Editar Fornecedor</a>
+              <a href="{% url 'excluir_fornecedor' fornecedor.id %}" class="btn alerta" onclick="return confirm('Tem certeza que deseja excluir o fornecedor {{ fornecedor.nome }}?');">Excluir Fornecedor</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">Nenhum fornecedor cadastrado.</p>
+  {% endif %}
+{% endblock %}

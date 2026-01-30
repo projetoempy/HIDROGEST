@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Tipo de Usuário</th>
+        <th>Empresa</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for usuario in usuarios %}
+      <tr>
+        <form method="post" action="{% url 'alterar_usuario' usuario.id %}">
+          {% csrf_token %}
+          <td>{{ usuario.username }}</td>
+          <td>
+            <select name="tipo_usuario">
+              <option value="" {% if not usuario.tipo_usuario %}selected{% endif %}>---------</option>
+              {% for tipo in tipos_usuario %}
+                <option value="{{ tipo.0 }}" {% if usuario.tipo_usuario == tipo.0 %}selected{% endif %}>
+                  {{ tipo.1 }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <select name="empresa_id">
+              <option value="" {% if not usuario.empresa %}selected{% endif %}>---------</option>
+              {% for empresa in empresas %}
+                <option value="{{ empresa.id }}" {% if usuario.empresa.id == empresa.id %}selected{% endif %}>
+                  {{ empresa.nome }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>            
+            <a href="{% url 'toggle_usuario' usuario.id %}" class="btn">
+              {% if usuario.status_ativo %}Desativar{% else %}Ativar{% endif %}
+            </a>
+            <button type="submit" class="btn">Salvar</button>
+          </td>
+        </form>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if usuarios %}
+    {% comment %} Exibir mensagem se houver usuários sem empresa {% endcomment %}
+    {% for usuario in usuarios %}
+      {% if not usuario.empresa %}
+        <p style="color: crimson; text-align: center;">
+          Aviso: O usuário {{ usuario.username }} não está associado a nenhuma empresa.
+        </p>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endblock %}

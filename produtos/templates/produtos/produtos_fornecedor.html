@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    {% if messages %}
+      <ul class="erro">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  <!-- Formulário de filtro por nome do produto -->
+  <form method="get" class="center">
+    <input type="text" name="produto_nome" placeholder="Buscar produto..." value="{{ filtro_nome }}">
+    <button type="submit" class="btn">Pesquisar</button>
+    <a href="{% url 'lista_produtos' %}" class="btn">Limpar</a>
+  </form>
+
+  {% for fornecedor in fornecedores %}
+    <h3>{{ fornecedor.nome }} (CNPJ: {{ fornecedor.cnpj }}) </h3>
+    <a href="{% url 'cadastrar_produto_fornecedor' fornecedor.id %}" class="btn">Cadastrar Produto</a>
+    <div class="container"></div>
+    {% if fornecedor.produtos_filtrados %}
+      <div class="row-4">
+  {% for produto in fornecedor.produtos_filtrados %}
+    <div class="card-comparativo">
+      <div class="card-header">
+        {% if produto.imagem %}
+          <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" class="card-icon">
+        {% else %}
+          <img src="{% static 'img/sem-imagem.png' %}" alt="Sem imagem" class="card-icon">
+        {% endif %}
+        <h4>{{ produto.nome }}</h4>
+      </div>
+      <div class="card-body-horizontal">
+        <div class="card-section">
+          <span class="label">Preço</span>
+          <span class="valor destaque">R$ {{ produto.preco }}</span>
+        </div>
+        <div class="divisor-vertical"></div>
+        <div class="card-section">
+          <a href="{% url 'editar_produto' produto.id %}" class="btn">Editar</a>
+          <a href="{% url 'excluir_produto' produto.id %}" class="btn alerta"
+             onclick="return confirm('Tem certeza que deseja excluir o produto {{ produto.nome }}?');">
+            Excluir
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+    {% else %}
+      <p class="empty">Nenhum produto cadastrado para este fornecedor.</p>
+    {% endif %}
+  {% endfor %}
+{% endblock %}

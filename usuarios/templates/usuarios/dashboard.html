@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+
+  <nav class="center">
+    {% comment %} Navegação para os principais módulos {% endcomment %}
+    {% if user.tipo_usuario == 'GERENTE_MATRIZ' or user.tipo_usuario == 'GESTOR_MATRIZ' %}
+      <a href="{% url 'lista_empresas' %}" class="btn">Empresas</a>
+      <a href="{% url 'lista_usuarios' %}" class="btn">Usuários</a>
+      <a href="{% url 'lista_fornecedores' %}" class="btn">Fornecedores</a>
+      <a href="{% url 'lista_produtos' %}" class="btn">Produtos</a>
+    {% endif %}
+    {% if user.tipo_usuario != 'FUNCIONARIO' %}
+      <a href="{% url 'lista_estoques' %}" class="btn">Estoques</a>
+      <a href="{% url 'lista_compras' %}" class="btn">Listas de Compra</a>
+    {% endif %}
+
+  </nav>
+  {% if messages %}
+    <ul class="erro">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if user.tipo_usuario == 'FUNCIONARIO' %}
+    <h3 class="center">Estoque da Empresa</h3>
+    {% if estoque %}
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Quantidade Mínima</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for estoque in estoque %}
+            <tr {% if estoque.quantidade < estoque.quantidade_minima %} style="background-color: rgb(255, 165, 192);" {% endif %}>
+              <td>{{ estoque.produto.nome }}</td>
+              <td>{{ estoque.quantidade }}</td>
+              <td>{{ estoque.quantidade_minima }}</td>
+              <td>
+                <form method="post" action="{% url 'retirar_estoque' estoque.id %}">
+                  {% csrf_token %}
+                  <input type="number" name="quantidade" min="1" max="{{ estoque.quantidade }}" required>
+                  <button type="submit" class="btn alerta">Retirar</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty">Nenhum estoque cadastrado para sua empresa.</p>
+    {% endif %}
+    <hr>
+    <h3 class="center">Filtrar Saídas</h3>
+    <form method="get" class="center">
+      <label for="data_inicio">Data Início:</label>
+      <input type="date" name="data_inicio" id="data_inicio" value="{{ request.GET.data_inicio }}">
+
+      <label for="data_fim">Data Fim:</label>
+      <input type="date" name="data_fim" id="data_fim" value="{{ request.GET.data_fim }}">
+
+      <label for="produto">Produto:</label>
+      <input type="text" name="produto" id="produto" value="{{ request.GET.produto }}">
+
+      <button type="submit" class="btn">Filtrar</button>
+      <a href="{% url 'dashboard' %}" class="btn alerta">Limpar</a>
+    </form>
+    <hr>
+    <h3 class="center">Saídas Registradas</h3>
+    {% if retiradas %}
+      <table>
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Usuário</th>
+            <th>Produto</th>
+            <th>Quantidade Retirada</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in retiradas %}
+            <tr>
+              <td>{{ log.data_hora|date:"d/m/Y H:i" }}</td>
+              <td>{{ log.usuario.username }}</td>
+              <td>{{ log.produto.nome }}</td>
+              <td>{{ log.quantidade }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty">Nenhuma saída registrada.</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}
